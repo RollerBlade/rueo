@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    app:contentInsetLeft="0dp"
+    app:contentInsetStart="0dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+
+        <ImageButton
+            android:id="@+id/prevWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:rotation="90"
+            android:layout_weight="0"
+            android:visibility="invisible"
+            />
+        <EditText
+            android:id="@+id/curWord"
+            android:hint="@string/searchBarHint"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:id="@+id/startSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Search"
+            android:onClick="startSearchOnButtonClick"/>
+
+        <ImageButton
+            android:id="@+id/nextWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:rotation="270"
+            android:layout_weight="0"
+            android:visibility="invisible"
+            />
+    </LinearLayout>
+</android.support.v7.widget.Toolbar>
+
