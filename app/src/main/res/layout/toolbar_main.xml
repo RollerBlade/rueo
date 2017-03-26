@@ -14,40 +14,19 @@
         android:gravity="center">
 
 
-        <ImageButton
-            android:id="@+id/prevWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/arrow_down_float"
-            android:rotation="90"
-            android:layout_weight="0"
-            android:visibility="invisible"
-            />
+
         <EditText
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
             android:id="@+id/curWord"
             android:hint="@string/searchBarHint"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_weight="1"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
             />
 
-        <Button
-            android:id="@+id/startSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="Search"
-            android:onClick="startSearchOnButtonClick"/>
-
-        <ImageButton
-            android:id="@+id/nextWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/arrow_down_float"
-            android:rotation="270"
-            android:layout_weight="0"
-            android:visibility="invisible"
-            />
     </LinearLayout>
 </android.support.v7.widget.Toolbar>
 

@@ -10,19 +10,35 @@ import java.util.Scanner;
 
 public class NetworkUtils
 {
-    final static String RUEO_BASE_URL = "http://rueo.ru/sercxo/";
+    final static private String RUEO_HTTP_URL = "http://rueo.ru/sercxo/";
+    final static private String AJAX_PARAM = "ajax";
+    final static private String AJAX_PARAM_TERM = "term";
 
     /*
     Составитель корректных URL с блекджеком и кириллицей
-    На входе - искомое слово, на выходе - URL
+    На входе - искомое слово и тип желаемого УРЛ (хттп или аякс)
+    На выходе - готовый URL
     */
-    public static URL buildUrl(String searchQuery) {
-        Uri builtUri = Uri.parse(RUEO_BASE_URL).buildUpon().appendPath(searchQuery).build();
-
+    public static URL buildUrl(String word, String type) {
+        Uri builtUri = null;
+        switch (type)
+        {
+            case "http":
+                builtUri = Uri.parse(RUEO_HTTP_URL).buildUpon().appendPath(word).build();
+                break;
+            case "ajax":
+                builtUri = Uri.parse(RUEO_HTTP_URL).buildUpon()
+                        .appendQueryParameter(AJAX_PARAM, "")
+                        .appendQueryParameter(AJAX_PARAM_TERM, word).build();
+                break;
+        }
         URL url = null;
-        try {
+        try
+        {
             url = new URL(builtUri.toString());
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e)
+        {
             e.printStackTrace();
         }
         return url;
@@ -33,21 +49,26 @@ public class NetworkUtils
     */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
+        try
+        {
             InputStream in = urlConnection.getInputStream();
 
             Scanner scanner = new Scanner(in);
             scanner.useDelimiter("\\A");
 
             boolean hasInput = scanner.hasNext();
-            if (hasInput) {
+            if (hasInput)
+            {
                 return scanner.next();
-            } else {
+            }
+            else
+            {
                 return null;
             }
-        } finally {
+        }
+        finally
+        {
             urlConnection.disconnect();
         }
     }
-
 }
