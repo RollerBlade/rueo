@@ -12,7 +12,6 @@ public class InputParser
     //метод принимает хттп страницы rueo со статьей и убирает лишнее
     public static String httpParser (String input)
     {
-        //TODO добавить аккуратный padding вокруг текста статьи
         //TODO поправить окраску текста
         String output;
         Document doc = Jsoup.parse(input);

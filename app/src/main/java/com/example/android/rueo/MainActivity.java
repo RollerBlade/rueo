@@ -24,6 +24,8 @@ import static com.example.android.rueo.network.InputParser.httpParser;
 
 public class MainActivity extends AppCompatActivity
 {
+    final static private String ERROR_NO_SUCH_WORD_FOUND = "Подходящей словарной статьи не найдено.";
+
     EditText curWord;
     TextView curDictionaryEntry;
     ProgressBar loadingIndicator;
@@ -96,6 +98,8 @@ public class MainActivity extends AppCompatActivity
     };
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -165,8 +169,14 @@ public class MainActivity extends AppCompatActivity
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
-                //TODO разобраться, почему deprecated
-                curDictionaryEntry.setText(Html.fromHtml(s));
+                if (s.contains(ERROR_NO_SUCH_WORD_FOUND))
+                {
+
+                }
+                else
+                {
+                    curDictionaryEntry.setText(Html.fromHtml(s));
+                }
             }
             else
             {
@@ -217,6 +227,7 @@ public class MainActivity extends AppCompatActivity
                     suggestion.setOnClickListener(ajaxSuggestionClicked);
                     suggestion.setTextSize(20);
                     suggestion.setPadding(20,0,0,0);
+
                     ajaxSuggestions.addView(suggestion);
                 }
             }
@@ -226,5 +237,17 @@ public class MainActivity extends AppCompatActivity
             }
         }
         //TODO продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
+         //TODO (1) поправить автостирание при новом вводе
+            //запилить флаг
+            //обработка бэкспейс
+            //обработка ввода буквы
+            //обработка выделения слова в серчбаре(onclick по серчбару)
+            //обработка флага при запуске серч
+        //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
+        //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
+                //добавить заголовок к аякс - выводу
+                //добавить заголовок к серч методу
+        //TODO (4) поправить цвет шрифта и фона в серчбаре
+        //TODO (5) продумать работу аякс при нулевом выводе (мб отбросить три последних буквы слова из серчбар)
     }
 }
