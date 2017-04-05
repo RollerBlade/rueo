@@ -27,16 +27,20 @@ public class MainActivity extends AppCompatActivity
     final static private String ERROR_NO_SUCH_WORD_FOUND = "Подходящей словарной статьи не найдено.";
 
     EditText curWord;
-    TextView curDictionaryEntry;
     ProgressBar loadingIndicator;
-    ScrollView ajaxField;
-    LinearLayout ajaxSuggestions;
+    LinearLayout outputField;
+    boolean searchBarEditDetectorEnabled = true;
+    boolean curWordShouldBeErased = false;
     View.OnKeyListener enterDetector = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
                     && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                 startSearch();
+            }
+            if ((event.getAction() == KeyEvent.ACTION_DOWN)
+                    && (keyCode == KeyEvent.KEYCODE_DEL)) {
+                curWordShouldBeErased = false;
             }
             return false;
         }
@@ -45,13 +49,20 @@ public class MainActivity extends AppCompatActivity
     TextWatcher searchBarEditDetector = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
         }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (s.length()>0)
+            if (s.length()>0 && searchBarEditDetectorEnabled)
             {
+                if (curWordShouldBeErased)
+                {
+                    curWordShouldBeErased = false;
+                    searchBarEditDetectorEnabled = false;
+                    curWord.setText(s.toString().substring(start, start+count));
+                    curWord.setSelection(curWord.getText().length());
+                    searchBarEditDetectorEnabled = true;
+                }
                 getAjax();
             }
         }
@@ -66,29 +77,34 @@ public class MainActivity extends AppCompatActivity
         public void onClick(View v)
         {
             TextView cur = (TextView) v;
+            searchBarEditDetectorEnabled = false;
             curWord.setText(cur.getText());
+            curWord.setSelection(curWord.getText().length());
+            searchBarEditDetectorEnabled = true;
             startSearch();
         }
         public void test (){}
     };
-
-
-
-
-    @Override
+    TextView.OnClickListener CurWordOnclickFlagDisabler = new TextView.OnClickListener()
+    {
+        @Override
+        public void onClick(View v) {
+            curWordShouldBeErased = false;
+        }
+    };
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        curDictionaryEntry = (TextView) findViewById(R.id.curDictionaryEntry);
         loadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         curWord = (EditText) findViewById(R.id.curWord);
-        ajaxField = (ScrollView) findViewById(R.id.ajaxOutputField);
-        ajaxSuggestions = (LinearLayout) findViewById(R.id.ajaxSuggestions);
+        outputField = (LinearLayout) findViewById(R.id.outputField);
         //обработчик нажатий Энтер:
             curWord.setOnKeyListener(enterDetector);
         //обработчик ввода текста:
             curWord.addTextChangedListener(searchBarEditDetector);
+        //обработчик тапов в поле ввода
+            curWord.setOnClickListener(CurWordOnclickFlagDisabler);
 
     }
 
@@ -113,9 +129,7 @@ public class MainActivity extends AppCompatActivity
         {
             super.onPreExecute();
             loadingIndicator.setVisibility(View.VISIBLE);
-            curDictionaryEntry.setText("");
-            curDictionaryEntry.setVisibility(View.VISIBLE);
-            ajaxField.setVisibility(View.INVISIBLE);
+            outputField.removeAllViews();
         }
 
         @Override
@@ -138,22 +152,19 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String s)
         {
             loadingIndicator.setVisibility(View.INVISIBLE);
+            TextView searchOutput = new TextView(MainActivity.this);
+            searchOutput.setPadding(20,20,20,20);
+            outputField.addView(searchOutput);
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
-                if (s.contains(ERROR_NO_SUCH_WORD_FOUND))
-                {
-                    curDictionaryEntry.setText(Html.fromHtml(s));
-                }
-                else
-                {
-                    curDictionaryEntry.setText(Html.fromHtml(s));
-                }
+                searchOutput.setText(Html.fromHtml(s));
             }
             else
             {
-                curDictionaryEntry.setText(R.string.network_error);
+                searchOutput.setText(R.string.network_error);
             }
+            curWordShouldBeErased = true;
         }
     }
 
@@ -162,9 +173,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute()
         {
-            curDictionaryEntry.setVisibility(View.INVISIBLE);
-            loadingIndicator.setVisibility(View.VISIBLE);
             super.onPreExecute();
+            outputField.removeAllViews();
+            loadingIndicator.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -187,11 +198,9 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String s)
         {
             loadingIndicator.setVisibility(View.INVISIBLE);
-            ajaxField.setVisibility(View.VISIBLE);
             if (s != null && !s.equals(""))
             {
                 ArrayList<String> ajaxAnswer = ajaxParser(s);
-                ajaxSuggestions.removeAllViews();
                 for (int i=0; i < ajaxAnswer.size(); i++)
                 {
                     TextView suggestion = new TextView(MainActivity.this);
@@ -200,12 +209,14 @@ public class MainActivity extends AppCompatActivity
                     suggestion.setTextSize(20);
                     suggestion.setPadding(20,0,0,0);
 
-                    ajaxSuggestions.addView(suggestion);
+                    outputField.addView(suggestion);
                 }
             }
             else
             {
-                curDictionaryEntry.setText(R.string.network_error);
+                TextView error = new TextView(MainActivity.this);
+                error.setText(R.string.network_error);
+                outputField.addView(error);
             }
         }
         //TODO продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")

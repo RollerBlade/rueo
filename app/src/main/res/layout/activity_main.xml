@@ -23,25 +23,13 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:id="@+id/outputField">
                     <TextView
-                        android:id="@+id/curDictionaryEntry"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/search_ivitation"
                         android:padding="10dp"/>
-                </LinearLayout>
-            </ScrollView>
-            <ScrollView
-                android:id="@+id/ajaxOutputField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="invisible">
-                <LinearLayout
-                    android:id="@+id/ajaxSuggestions"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
                 </LinearLayout>
             </ScrollView>
             <ProgressBar

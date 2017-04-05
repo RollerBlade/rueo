@@ -24,7 +24,10 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:imeOptions="actionSearch"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:singleLine="true"
+            android:nextFocusDown="@id/curWord"
             />
 
     </LinearLayout>
