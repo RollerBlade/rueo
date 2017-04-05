@@ -20,14 +20,17 @@
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <TextView
-                    android:id="@+id/curDictionaryEntry"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/search_ivitation"
-                    android:padding="10dp"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:id="@+id/outputField">
+                    <TextView
+                        android:id="@+id/curDictionaryEntry"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_ivitation"
+                        android:padding="10dp"/>
+                </LinearLayout>
             </ScrollView>
             <ScrollView
                 android:id="@+id/ajaxOutputField"

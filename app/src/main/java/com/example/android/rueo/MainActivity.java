@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity
     ProgressBar loadingIndicator;
     ScrollView ajaxField;
     LinearLayout ajaxSuggestions;
-    boolean searchBarEditDetectorEnabled = true;
     View.OnKeyListener enterDetector = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (s.length()>0 && searchBarEditDetectorEnabled)
+            if (s.length()>0)
             {
                 getAjax();
             }
@@ -62,36 +61,12 @@ public class MainActivity extends AppCompatActivity
 
         }
     };
-    View.OnFocusChangeListener searchBarFocusJumper = new View.OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View v, boolean hasFocus)
-        {
-            if (hasFocus)
-            {
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                switch (v.getId())
-                {
-                    case R.id.curDictionaryEntry:
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        break;
-                    case R.id.curWord:
-                        EditText view = (EditText) v;
-                        view.setText("");
-                        imm.showSoftInput(v, 0);
-                        break;
-                }
-            }
-        }
-        public void test (){}
-    };
     View.OnClickListener ajaxSuggestionClicked = new View.OnClickListener() {
         @Override
         public void onClick(View v)
         {
             TextView cur = (TextView) v;
-            searchBarEditDetectorEnabled = false;
             curWord.setText(cur.getText());
-            searchBarEditDetectorEnabled = true;
             startSearch();
         }
         public void test (){}
@@ -114,9 +89,7 @@ public class MainActivity extends AppCompatActivity
             curWord.setOnKeyListener(enterDetector);
         //обработчик ввода текста:
             curWord.addTextChangedListener(searchBarEditDetector);
-        //обработчики прыжков фокуса со строки поиска (в т.ч. очистка поля поиска при его выделении)
-            curWord.setOnFocusChangeListener(searchBarFocusJumper);
-            curDictionaryEntry.setOnFocusChangeListener(searchBarFocusJumper);
+
     }
 
     //инициирует поиск словарной статьи по содержимому серчбара
@@ -142,7 +115,6 @@ public class MainActivity extends AppCompatActivity
             loadingIndicator.setVisibility(View.VISIBLE);
             curDictionaryEntry.setText("");
             curDictionaryEntry.setVisibility(View.VISIBLE);
-            curDictionaryEntry.requestFocus();
             ajaxField.setVisibility(View.INVISIBLE);
         }
 
@@ -171,7 +143,7 @@ public class MainActivity extends AppCompatActivity
                 s = httpParser(s);
                 if (s.contains(ERROR_NO_SUCH_WORD_FOUND))
                 {
-
+                    curDictionaryEntry.setText(Html.fromHtml(s));
                 }
                 else
                 {
