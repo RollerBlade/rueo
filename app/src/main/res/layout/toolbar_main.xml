@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
-    app:contentInsetLeft="0dp"
-    app:contentInsetStart="0dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorPrimary">
+
+    android:background="?attr/colorPrimary"
+
+    app:contentInsetLeft="0dp"
+    app:contentInsetStart="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,21 +17,23 @@
         android:gravity="center">
 
 
-
         <EditText
-            android:paddingLeft="40dp"
-            android:paddingRight="40dp"
             android:id="@+id/curWord"
-            android:hint="@string/searchBarHint"
-            android:layout_height="wrap_content"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:imeOptions="actionSearch"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:singleLine="true"
+            android:hint="@string/searchBarHint"
+            android:imeOptions="actionSearch"
             android:nextFocusDown="@id/curWord"
-            />
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:theme="@style/EditTextTheme"
+            android:inputType="textFilter"
+            android:textColor="#FFF"
+            android:textColorHint="#AAA"
+            android:singleLine="true" />
 
     </LinearLayout>
 </android.support.v7.widget.Toolbar>

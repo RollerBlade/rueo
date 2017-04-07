@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
                     && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                startSearch();
+                new httpRetrieveTask().execute(curWord.getText().toString());
             }
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
                     && (keyCode == KeyEvent.KEYCODE_DEL)) {
@@ -47,15 +47,20 @@ public class MainActivity extends AppCompatActivity
         private void test (){}
     };
     TextWatcher searchBarEditDetector = new TextWatcher() {
+        String textBefore = null, textAfter = null;
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            textBefore = s.toString();
         }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
+            textAfter = s.toString();
             if (s.length()>0 && searchBarEditDetectorEnabled)
             {
-                if (curWordShouldBeErased)
+                //жуткие костыли. Если не сравнивать textBefore и textAfter,
+                //то многократный энтер заваливает флаг curShouldBeErased
+                if (curWordShouldBeErased && !textBefore.equals(textAfter))
                 {
                     curWordShouldBeErased = false;
                     searchBarEditDetectorEnabled = false;
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity
                     curWord.setSelection(curWord.getText().length());
                     searchBarEditDetectorEnabled = true;
                 }
-                getAjax();
+                new ajaxRetrieveTask().execute(curWord.getText().toString());;
             }
         }
 
@@ -81,17 +86,19 @@ public class MainActivity extends AppCompatActivity
             curWord.setText(cur.getText());
             curWord.setSelection(curWord.getText().length());
             searchBarEditDetectorEnabled = true;
-            startSearch();
+            new httpRetrieveTask().execute(curWord.getText().toString());
         }
         public void test (){}
     };
-    TextView.OnClickListener CurWordOnclickFlagDisabler = new TextView.OnClickListener()
-    {
+    TextView.OnClickListener CurWordOnclickFlagDisabler = new TextView.OnClickListener() {
         @Override
         public void onClick(View v) {
             curWordShouldBeErased = false;
         }
+        private void test (){}
     };
+
+
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -105,25 +112,10 @@ public class MainActivity extends AppCompatActivity
             curWord.addTextChangedListener(searchBarEditDetector);
         //обработчик тапов в поле ввода
             curWord.setOnClickListener(CurWordOnclickFlagDisabler);
-
-    }
-
-    //инициирует поиск словарной статьи по содержимому серчбара
-    private void startSearch() {
-        String searchInput = curWord.getText().toString();
-        URL eoURLfull = NetworkUtils.buildUrl(searchInput, "http");
-        new httpRetrieveTask().execute(eoURLfull);
-    }
-
-    //инициирует аякс-запрос на сайт
-    private void getAjax() {
-        String searchInput = curWord.getText().toString();
-        URL testURL = NetworkUtils.buildUrl(searchInput, "ajax");
-        new ajaxRetrieveTask().execute(testURL);
     }
 
     //в соседнем треде получаем словарную статью, кромсаем ее и выводим
-    private class httpRetrieveTask extends AsyncTask <URL, Void, String> {
+    private class httpRetrieveTask extends AsyncTask <String, Void, String> {
         @Override
         protected void onPreExecute()
         {
@@ -133,9 +125,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(URL... urls)
+        protected String doInBackground(String... urls)
         {
-            URL eoUrl = urls[0];
+            URL eoUrl = NetworkUtils.buildUrl(urls[0], "http");
             String httpListing = null;
             try
             {
@@ -158,7 +150,7 @@ public class MainActivity extends AppCompatActivity
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
-                searchOutput.setText(Html.fromHtml(s));
+                searchOutput.setText(Html.fromHtml(s).toString());
             }
             else
             {
@@ -169,7 +161,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //в соседнем треде получаем аякс-ответ, парсим, выводим кликабельные TextView
-    private class ajaxRetrieveTask extends AsyncTask <URL, Void, String> {
+    private class ajaxRetrieveTask extends AsyncTask <String, Void, String> {
         @Override
         protected void onPreExecute()
         {
@@ -179,9 +171,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(URL... urls)
+        protected String doInBackground(String... urls)
         {
-            URL eoUrl = urls[0];
+            URL eoUrl = NetworkUtils.buildUrl(urls[0], "ajax");
             String JSONListing = null;
             try
             {
@@ -220,17 +212,10 @@ public class MainActivity extends AppCompatActivity
             }
         }
         //TODO продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
-         //TODO (1) поправить автостирание при новом вводе
-            //запилить флаг
-            //обработка бэкспейс
-            //обработка ввода буквы
-            //обработка выделения слова в серчбаре(onclick по серчбару)
-            //обработка флага при запуске серч
         //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
         //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
                 //добавить заголовок к аякс - выводу
                 //добавить заголовок к серч методу
-        //TODO (4) поправить цвет шрифта и фона в серчбаре
         //TODO (5) продумать работу аякс при нулевом выводе (мб отбросить три последних буквы слова из серчбар)
     }
 }
