@@ -1,6 +1,6 @@
 package com.example.android.rueo;
 
-import android.content.Context;
+
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,12 +8,11 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import com.example.android.rueo.network.NetworkUtils;
 import java.io.IOException;
@@ -31,53 +30,73 @@ public class MainActivity extends AppCompatActivity
     LinearLayout outputField;
     boolean searchBarEditDetectorEnabled = true;
     boolean curWordShouldBeErased = false;
-    View.OnKeyListener enterDetector = new View.OnKeyListener() {
+    httpRetrieveTask hrt = null;
+    ajaxRetrieveTask art = null;
+
+    View.OnKeyListener enterDetector = new View.OnKeyListener()
+    {
         @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
+        public boolean onKey(View v, int keyCode, KeyEvent event)
+        {
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                    && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                new httpRetrieveTask().execute(curWord.getText().toString());
-            }
-            if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                    && (keyCode == KeyEvent.KEYCODE_DEL)) {
-                curWordShouldBeErased = false;
+                    && (keyCode == KeyEvent.KEYCODE_ENTER))
+            {
+                startHttpRetrieveTask();
             }
             return false;
         }
         private void test (){}
     };
-    TextWatcher searchBarEditDetector = new TextWatcher() {
+    TextWatcher searchBarEditDetector = new TextWatcher()
+    {
         String textBefore = null, textAfter = null;
+        private int mPreviousLength;
+        private boolean mBackSpace;
+
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after)
+        {
             textBefore = s.toString();
+            mPreviousLength = s.length();
         }
 
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        public void onTextChanged(CharSequence s, int start, int before, int count)
+        {
             textAfter = s.toString();
             if (s.length()>0 && searchBarEditDetectorEnabled)
             {
-                //жуткие костыли. Если не сравнивать textBefore и textAfter,
-                //то многократный энтер заваливает флаг curShouldBeErased
-                if (curWordShouldBeErased && !textBefore.equals(textAfter))
+                //костыль обработки бэкспейс
+                mBackSpace = mPreviousLength == (s.length()+1);
+                if (mBackSpace)
                 {
-                    curWordShouldBeErased = false;
+                    isCurWordShouldBeErased(false);
+                }
+                //очищаем серчбар, если надо
+                if (curWordShouldBeErased)
+                {
+                    isCurWordShouldBeErased(false);
                     searchBarEditDetectorEnabled = false;
                     curWord.setText(s.toString().substring(start, start+count));
                     curWord.setSelection(curWord.getText().length());
                     searchBarEditDetectorEnabled = true;
                 }
-                new ajaxRetrieveTask().execute(curWord.getText().toString());;
+                startAjaxRetrieveTask();
+
             }
         }
 
         @Override
-        public void afterTextChanged(Editable s) {
-
+        public void afterTextChanged(Editable s)
+        {
+            if (s.length()==0)
+            {
+                outputField.removeAllViews();
+            }
         }
     };
-    View.OnClickListener ajaxSuggestionClicked = new View.OnClickListener() {
+    View.OnClickListener ajaxSuggestionClicked = new View.OnClickListener()
+    {
         @Override
         public void onClick(View v)
         {
@@ -86,18 +105,26 @@ public class MainActivity extends AppCompatActivity
             curWord.setText(cur.getText());
             curWord.setSelection(curWord.getText().length());
             searchBarEditDetectorEnabled = true;
-            new httpRetrieveTask().execute(curWord.getText().toString());
+            startHttpRetrieveTask();
         }
         public void test (){}
     };
-    TextView.OnClickListener CurWordOnclickFlagDisabler = new TextView.OnClickListener() {
+    TextView.OnTouchListener CurWordOnclickFlagDisabler = new TextView.OnTouchListener()
+    {
         @Override
-        public void onClick(View v) {
-            curWordShouldBeErased = false;
+        public boolean onTouch(View v, MotionEvent a)
+        {
+            isCurWordShouldBeErased(false);
+            return false;
         }
         private void test (){}
     };
 
+    public boolean isCurWordShouldBeErased(boolean flag)
+    {
+        curWordShouldBeErased = flag;
+        return curWordShouldBeErased;
+    }
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -111,7 +138,35 @@ public class MainActivity extends AppCompatActivity
         //обработчик ввода текста:
             curWord.addTextChangedListener(searchBarEditDetector);
         //обработчик тапов в поле ввода
-            curWord.setOnClickListener(CurWordOnclickFlagDisabler);
+            curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
+    }
+
+    private void startHttpRetrieveTask ()
+    {
+        if (hrt != null)
+        {
+            hrt.cancel(false);
+        }
+        if (art != null)
+        {
+            art.cancel(false);
+        }
+        hrt = new httpRetrieveTask();
+        hrt.execute(curWord.getText().toString());
+    }
+
+    private void startAjaxRetrieveTask ()
+    {
+        if (hrt != null)
+        {
+            hrt.cancel(false);
+        }
+        if (art != null)
+        {
+            art.cancel(false);
+        }
+        art = new ajaxRetrieveTask();
+        art.execute(curWord.getText().toString());
     }
 
     //в соседнем треде получаем словарную статью, кромсаем ее и выводим
@@ -156,7 +211,7 @@ public class MainActivity extends AppCompatActivity
             {
                 searchOutput.setText(R.string.network_error);
             }
-            curWordShouldBeErased = true;
+            isCurWordShouldBeErased(true);
         }
     }
 
@@ -200,7 +255,6 @@ public class MainActivity extends AppCompatActivity
                     suggestion.setOnClickListener(ajaxSuggestionClicked);
                     suggestion.setTextSize(20);
                     suggestion.setPadding(20,0,0,0);
-
                     outputField.addView(suggestion);
                 }
             }
@@ -211,11 +265,12 @@ public class MainActivity extends AppCompatActivity
                 outputField.addView(error);
             }
         }
-        //TODO продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
-        //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
-        //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
-                //добавить заголовок к аякс - выводу
-                //добавить заголовок к серч методу
-        //TODO (5) продумать работу аякс при нулевом выводе (мб отбросить три последних буквы слова из серчбар)
     }
+
+    //TODO (1) продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
+    //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
+    //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
+    //добавить заголовок к аякс - выводу
+    //добавить заголовок к серч методу
+    //TODO (4) продумать работу аякс при нулевом выводе (мб отбросить три последних буквы слова из серчбар)
 }

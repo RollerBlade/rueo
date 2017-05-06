@@ -35,6 +35,7 @@
             android:textColorHint="#AAA"
             android:singleLine="true" />
 
+
     </LinearLayout>
 </android.support.v7.widget.Toolbar>
 
