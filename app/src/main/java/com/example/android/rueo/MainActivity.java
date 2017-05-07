@@ -1,12 +1,14 @@
 package com.example.android.rueo;
 
 
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,10 +28,13 @@ public class MainActivity extends AppCompatActivity
     final static private String ERROR_NO_SUCH_WORD_FOUND = "Подходящей словарной статьи не найдено.";
 
     EditText curWord;
+    String curWordStr;
+    int curWordStrShifter = 0;
     ProgressBar loadingIndicator;
     LinearLayout outputField;
     boolean searchBarEditDetectorEnabled = true;
     boolean curWordShouldBeErased = false;
+    boolean ajaxStateRecursion = false;
     httpRetrieveTask hrt = null;
     ajaxRetrieveTask art = null;
 
@@ -41,7 +46,7 @@ public class MainActivity extends AppCompatActivity
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
                     && (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                startHttpRetrieveTask();
+                startHttpRetrieveTask(curWord.getText().toString());
             }
             return false;
         }
@@ -81,7 +86,7 @@ public class MainActivity extends AppCompatActivity
                     curWord.setSelection(curWord.getText().length());
                     searchBarEditDetectorEnabled = true;
                 }
-                startAjaxRetrieveTask();
+                startAjaxRetrieveTask(curWord.getText().toString());
 
             }
         }
@@ -93,6 +98,7 @@ public class MainActivity extends AppCompatActivity
             {
                 outputField.removeAllViews();
             }
+            curWordStr = curWord.getText().toString();
         }
     };
     View.OnClickListener ajaxSuggestionClicked = new View.OnClickListener()
@@ -105,7 +111,7 @@ public class MainActivity extends AppCompatActivity
             curWord.setText(cur.getText());
             curWord.setSelection(curWord.getText().length());
             searchBarEditDetectorEnabled = true;
-            startHttpRetrieveTask();
+            startHttpRetrieveTask(curWord.getText().toString());
         }
         public void test (){}
     };
@@ -141,7 +147,7 @@ public class MainActivity extends AppCompatActivity
             curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
     }
 
-    private void startHttpRetrieveTask ()
+    private void startHttpRetrieveTask (String input)
     {
         if (hrt != null)
         {
@@ -152,10 +158,10 @@ public class MainActivity extends AppCompatActivity
             art.cancel(false);
         }
         hrt = new httpRetrieveTask();
-        hrt.execute(curWord.getText().toString());
+        hrt.execute(input);
     }
 
-    private void startAjaxRetrieveTask ()
+    private void startAjaxRetrieveTask (String input)
     {
         if (hrt != null)
         {
@@ -166,7 +172,7 @@ public class MainActivity extends AppCompatActivity
             art.cancel(false);
         }
         art = new ajaxRetrieveTask();
-        art.execute(curWord.getText().toString());
+        art.execute(input);
     }
 
     //в соседнем треде получаем словарную статью, кромсаем ее и выводим
@@ -248,6 +254,30 @@ public class MainActivity extends AppCompatActivity
             if (s != null && !s.equals(""))
             {
                 ArrayList<String> ajaxAnswer = ajaxParser(s);
+                TextView title = new TextView(MainActivity.this);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setTextSize(20);
+                title.setPadding(20, 0, 0, 0);
+                if (ajaxAnswer.size()>0)
+                {
+                    title.setText("Возможные совпадения:");
+                    curWordStrShifter = 0;
+                }
+                else
+                {
+                    if (curWord.length()>1 && curWord.length() > curWordStrShifter)
+                    {
+                        curWordStrShifter++;
+                        startAjaxRetrieveTask(curWord.getText().toString()
+                                .substring(0, curWord.length() - curWordStrShifter));
+                        title.setText("Ошибка ввода!");
+                    }
+                    else
+                    {
+                        title.setText("Совпадений не найдено!");
+                    }
+                }
+                outputField.addView(title);
                 for (int i=0; i < ajaxAnswer.size(); i++)
                 {
                     TextView suggestion = new TextView(MainActivity.this);
