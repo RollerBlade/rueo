@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">rueo</string>
+    <string name="app_name">Rueo</string>
     <string name="searchBarHint">Enter the search word!</string>
     <string name="network_error">Network error! Please try again later!</string>
     <string name="search_ivitation">Make a search!</string>

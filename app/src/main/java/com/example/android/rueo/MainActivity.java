@@ -3,40 +3,52 @@ package com.example.android.rueo;
 
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.example.android.rueo.network.NetworkUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import static com.example.android.rueo.network.InputParser.ajaxParser;
 import static com.example.android.rueo.network.InputParser.httpParser;
+import com.example.android.rueo.history.Stack;
+import com.example.android.rueo.network.NetworkUtils;
 
 public class MainActivity extends AppCompatActivity
 {
-    final static private String ERROR_NO_SUCH_WORD_FOUND = "Подходящей словарной статьи не найдено.";
-
-    EditText curWord;
-    String curWordStr;
-    int curWordStrShifter = 0;
+    //серчбар
+        EditText curWord;
+        String curWordStr;
+    //поле для вывода статей и подсказок
+        LinearLayout outputField;
+    //кнопки управления справа от серчбара
+        ImageView leftBtn, rightBtn, downBtn, settingsBtn;
     ProgressBar loadingIndicator;
-    LinearLayout outputField;
-    boolean searchBarEditDetectorEnabled = true;
-    boolean curWordShouldBeErased = false;
-    boolean ajaxStateRecursion = false;
     httpRetrieveTask hrt = null;
     ajaxRetrieveTask art = null;
+    int curWordStrShifter = 0;
+    boolean searchBarEditDetectorEnabled = true;
+    boolean curWordShouldBeErased = false;
+    Stack searchBarStack = new Stack();
+
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+
 
     View.OnKeyListener enterDetector = new View.OnKeyListener()
     {
@@ -47,6 +59,7 @@ public class MainActivity extends AppCompatActivity
                     && (keyCode == KeyEvent.KEYCODE_ENTER))
             {
                 startHttpRetrieveTask(curWord.getText().toString());
+                searchBarStack.push(curWord.getText().toString());
             }
             return false;
         }
@@ -112,6 +125,9 @@ public class MainActivity extends AppCompatActivity
             curWord.setSelection(curWord.getText().length());
             searchBarEditDetectorEnabled = true;
             startHttpRetrieveTask(curWord.getText().toString());
+            searchBarStack.push(curWord.getText().toString());
+
+
         }
         public void test (){}
     };
@@ -125,6 +141,77 @@ public class MainActivity extends AppCompatActivity
         }
         private void test (){}
     };
+    ImageView.OnTouchListener buttonOnClickImgSwapper = new ImageView.OnTouchListener()
+    {
+        @Override
+        public boolean onTouch(View v, MotionEvent event)
+        {
+            ImageView img = (ImageView) v;
+
+            switch (img.getId())
+            {
+                case R.id.settings:
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        img.setImageResource(R.drawable.ic_settings_pressed);
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP)
+                    {
+                        img.setImageResource(R.drawable.ic_settings_unpressed);
+                    }
+                    return true;
+                case R.id.arrowLeft:
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_pressed);
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_unpressed);
+                        String temp = searchBarStack.getLeft();
+                        if (temp != null)
+                        {
+                            searchBarEditDetectorEnabled = false;
+                            curWord.setText(temp);
+                            startHttpRetrieveTask(temp);
+                            searchBarEditDetectorEnabled = true;
+                        }
+                    }
+                    return true;
+                case R.id.arrowRight:
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_pressed);
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_unpressed);
+                        String temp = searchBarStack.getRight();
+                        if (temp != null)
+                        {
+                            searchBarEditDetectorEnabled = false;
+                            curWord.setText(temp);
+                            startHttpRetrieveTask(temp);
+                            searchBarEditDetectorEnabled = true;
+                        }
+                    }
+                    return true;
+                default:
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_pressed);
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP)
+                    {
+                        img.setImageResource(R.drawable.ic_down_arrow_unpressed);
+                    }
+                    return true;
+            }
+            //return false;
+        }
+        private void test (){}
+    };
+
 
     public boolean isCurWordShouldBeErased(boolean flag)
     {
@@ -139,12 +226,26 @@ public class MainActivity extends AppCompatActivity
         loadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         curWord = (EditText) findViewById(R.id.curWord);
         outputField = (LinearLayout) findViewById(R.id.outputField);
+        leftBtn = (ImageView) findViewById(R.id.arrowLeft);
+        rightBtn = (ImageView) findViewById(R.id.arrowRight);
+        downBtn = (ImageView) findViewById(R.id.arrowDown);
+        settingsBtn = (ImageView) findViewById(R.id.settings);
         //обработчик нажатий Энтер:
             curWord.setOnKeyListener(enterDetector);
         //обработчик ввода текста:
             curWord.addTextChangedListener(searchBarEditDetector);
         //обработчик тапов в поле ввода
             curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
+        //переключатель картинок на кнопках
+            leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            downBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+
+
     }
 
     private void startHttpRetrieveTask (String input)
@@ -260,7 +361,16 @@ public class MainActivity extends AppCompatActivity
                 title.setPadding(20, 0, 0, 0);
                 if (ajaxAnswer.size()>0)
                 {
-                    title.setText("Возможные совпадения:");
+                    if (curWordStrShifter>0)
+                    {
+                        title.setText("Ошибка ввода!\nВозможные совпадения:");
+                        //outputField.addView(title);
+                    }
+                    else
+                    {
+                        title.setText("Возможные совпадения:");
+                        //outputField.addView(title);
+                    }
                     curWordStrShifter = 0;
                 }
                 else
@@ -270,14 +380,14 @@ public class MainActivity extends AppCompatActivity
                         curWordStrShifter++;
                         startAjaxRetrieveTask(curWord.getText().toString()
                                 .substring(0, curWord.length() - curWordStrShifter));
-                        title.setText("Ошибка ввода!");
+                        //title.setText("Ошибка ввода!");
                     }
                     else
                     {
                         title.setText("Совпадений не найдено!");
+                        //outputField.addView(title);
                     }
                 }
-                outputField.addView(title);
                 for (int i=0; i < ajaxAnswer.size(); i++)
                 {
                     TextView suggestion = new TextView(MainActivity.this);
@@ -300,7 +410,4 @@ public class MainActivity extends AppCompatActivity
     //TODO (1) продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
     //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
     //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
-    //добавить заголовок к аякс - выводу
-    //добавить заголовок к серч методу
-    //TODO (4) продумать работу аякс при нулевом выводе (мб отбросить три последних буквы слова из серчбар)
 }

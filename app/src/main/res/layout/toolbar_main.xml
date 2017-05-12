@@ -14,7 +14,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_marginRight="5dp">
 
 
         <EditText
@@ -26,15 +27,39 @@
             android:focusableInTouchMode="true"
             android:hint="@string/searchBarHint"
             android:imeOptions="actionSearch"
-            android:nextFocusDown="@id/curWord"
-            android:paddingLeft="40dp"
-            android:paddingRight="40dp"
-            android:theme="@style/EditTextTheme"
             android:inputType="textFilter"
+            android:nextFocusDown="@id/curWord"
+            android:paddingLeft="10dp"
+            android:paddingRight="40dp"
+            android:singleLine="true"
             android:textColor="#FFF"
             android:textColorHint="#AAA"
-            android:singleLine="true" />
+            android:theme="@style/EditTextTheme" />
 
+
+        <ImageView
+            android:id="@+id/arrowDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_down_arrow_unpressed" />
+
+        <ImageView
+            android:id="@+id/arrowLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="90"
+            app:srcCompat="@drawable/ic_down_arrow_unpressed" />
+        <ImageView
+            android:id="@+id/arrowRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="270"
+            app:srcCompat="@drawable/ic_down_arrow_unpressed" />
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_settings_unpressed" />
 
     </LinearLayout>
 </android.support.v7.widget.Toolbar>
