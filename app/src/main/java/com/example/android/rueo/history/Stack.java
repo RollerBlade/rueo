@@ -1,6 +1,9 @@
 package com.example.android.rueo.history;
 
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by RollerBlade on 12.05.2017.
@@ -23,10 +26,47 @@ public class Stack
         arr.add(temp);
         if (pointer != null)
         {
+
             arr.get(pointer).right = temp;
             temp.left = arr.get(pointer);
+            for (int i = pointer+1; i < arr.size()-1; i++)
+            {
+                arr.get(i).left = null;
+                arr.get(i).right = null;
+            }
+            checkForDoubles(input);
         }
         pointer = arr.size() - 1;
+    }
+
+    public void detete (int n)
+    {
+        if (arr.get(n).left != null)
+        {
+            arr.get(n).left.right = arr.get(n).right;
+        }
+        if (arr.get(n).right != null)
+        {
+            arr.get(n).right.left = arr.get(n).left;
+        }
+        arr.remove(n);
+    }
+
+    public void checkForDoubles (String input)
+    {
+        int duplicate = -1;
+        for (int i = 0; i < arr.size()-1; i++)
+        {
+            if (arr.get(i).word.equals(input))
+            {
+                duplicate = i;
+            }
+        }
+        if (duplicate > -1)
+        {
+            detete(duplicate);
+            Log.d("ololo", "i is "+ duplicate);
+        }
     }
 
     public String getLeft ()
@@ -79,4 +119,13 @@ public class Stack
         return out;
     }
 
+    public List<String> getListArray()
+    {
+        List<String> out = new ArrayList();
+        for (int i=0; i<arr.size(); i++)
+        {
+            out.add(arr.get(i).toString());
+        }
+        return out;
+    }
 }

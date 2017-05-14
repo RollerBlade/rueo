@@ -14,12 +14,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import java.io.IOException;
 import java.net.URL;
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity
         LinearLayout outputField;
     //кнопки управления справа от серчбара
         ImageView leftBtn, rightBtn, downBtn, settingsBtn;
+    //для истории в правом дровере
+        ArrayAdapter<String> historyAdapter;
     ProgressBar loadingIndicator;
     httpRetrieveTask hrt = null;
     ajaxRetrieveTask art = null;
@@ -46,8 +50,9 @@ public class MainActivity extends AppCompatActivity
     boolean curWordShouldBeErased = false;
     Stack searchBarStack = new Stack();
 
+
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
+    private ListView leftDrawer, rightDrawer;
 
 
     View.OnKeyListener enterDetector = new View.OnKeyListener()
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity
             {
                 startHttpRetrieveTask(curWord.getText().toString());
                 searchBarStack.push(curWord.getText().toString());
+                listInflator(rightDrawer, searchBarStack.getStringArray());
             }
             return false;
         }
@@ -113,23 +119,6 @@ public class MainActivity extends AppCompatActivity
             }
             curWordStr = curWord.getText().toString();
         }
-    };
-    View.OnClickListener ajaxSuggestionClicked = new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            TextView cur = (TextView) v;
-            searchBarEditDetectorEnabled = false;
-            curWord.setText(cur.getText());
-            curWord.setSelection(curWord.getText().length());
-            searchBarEditDetectorEnabled = true;
-            startHttpRetrieveTask(curWord.getText().toString());
-            searchBarStack.push(curWord.getText().toString());
-
-
-        }
-        public void test (){}
     };
     TextView.OnTouchListener CurWordOnclickFlagDisabler = new TextView.OnTouchListener()
     {
@@ -211,12 +200,35 @@ public class MainActivity extends AppCompatActivity
         }
         private void test (){}
     };
+    ListView.OnItemClickListener suggestionClicked = new ListView.OnItemClickListener()
+    {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+        {
+            TextView cur = (TextView) view;
+            searchBarEditDetectorEnabled = false;
+            curWord.setText(cur.getText());
+            curWord.setSelection(curWord.getText().length());
+            searchBarEditDetectorEnabled = true;
+            startHttpRetrieveTask(curWord.getText().toString());
+            searchBarStack.push(curWord.getText().toString());
+            listInflator(rightDrawer, searchBarStack.getStringArray());
+        }
+        public void test (){}
+    };
+
 
 
     public boolean isCurWordShouldBeErased(boolean flag)
     {
         curWordShouldBeErased = flag;
         return curWordShouldBeErased;
+    }
+
+    private void listInflator (ListView myList, String[] array)
+    {
+        historyAdapter.clear();
+        historyAdapter.addAll(searchBarStack.getListArray());
     }
 
     protected void onCreate(Bundle savedInstanceState)
@@ -242,10 +254,13 @@ public class MainActivity extends AppCompatActivity
             downBtn.setOnTouchListener(buttonOnClickImgSwapper);
             settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        leftDrawer = (ListView) findViewById(R.id.left_drawer);
+        rightDrawer = (ListView) findViewById(R.id.right_drawer);
 
-
-
+        historyAdapter = new ArrayAdapter<String>
+                (this, R.layout.drawer_list_item, searchBarStack.getListArray());
+        rightDrawer.setAdapter(historyAdapter);
+        rightDrawer.setOnItemClickListener(suggestionClicked);
     }
 
     private void startHttpRetrieveTask (String input)
@@ -306,9 +321,11 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String s)
         {
             loadingIndicator.setVisibility(View.INVISIBLE);
+            ScrollView searchOutputWrapper = new ScrollView(MainActivity.this);
             TextView searchOutput = new TextView(MainActivity.this);
             searchOutput.setPadding(20,20,20,20);
-            outputField.addView(searchOutput);
+            searchOutputWrapper.addView(searchOutput);
+            outputField.addView(searchOutputWrapper);
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
@@ -388,15 +405,13 @@ public class MainActivity extends AppCompatActivity
                         //outputField.addView(title);
                     }
                 }
-                for (int i=0; i < ajaxAnswer.size(); i++)
-                {
-                    TextView suggestion = new TextView(MainActivity.this);
-                    suggestion.setText(ajaxAnswer.get(i));
-                    suggestion.setOnClickListener(ajaxSuggestionClicked);
-                    suggestion.setTextSize(20);
-                    suggestion.setPadding(20,0,0,0);
-                    outputField.addView(suggestion);
-                }
+
+                ListView ajaxOutput = new ListView(MainActivity.this);
+                ArrayAdapter<String> ajaxAdapter = new ArrayAdapter<String>
+                    (MainActivity.this,R.layout.ajax_list_item, ajaxAnswer);
+                ajaxOutput.setAdapter(ajaxAdapter);
+                ajaxOutput.setOnItemClickListener(suggestionClicked);
+                outputField.addView(ajaxOutput);
             }
             else
             {
@@ -406,6 +421,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
 
     //TODO (1) продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
     //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)

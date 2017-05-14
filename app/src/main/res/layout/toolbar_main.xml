@@ -32,7 +32,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="40dp"
             android:singleLine="true"
-            android:textColor="#FFF"
+            android:textColor="@color/textColor"
             android:textColorHint="#AAA"
             android:theme="@style/EditTextTheme" />
 
