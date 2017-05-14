@@ -1,6 +1,7 @@
 package com.example.android.rueo;
 
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.v4.widget.DrawerLayout;
@@ -9,9 +10,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.EventLog;
-import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +23,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,6 +44,11 @@ public class MainActivity extends AppCompatActivity
         ImageView leftBtn, rightBtn, downBtn, settingsBtn;
     //для истории в правом дровере
         ArrayAdapter<String> historyAdapter;
+    //дроверы
+        private DrawerLayout mDrawerLayout;
+        private ListView rightDrawer;
+        private ScrollView leftDrawer;
+    long timestamp;
     ProgressBar loadingIndicator;
     httpRetrieveTask hrt = null;
     ajaxRetrieveTask art = null;
@@ -50,9 +57,6 @@ public class MainActivity extends AppCompatActivity
     boolean curWordShouldBeErased = false;
     Stack searchBarStack = new Stack();
 
-
-    private DrawerLayout mDrawerLayout;
-    private ListView leftDrawer, rightDrawer;
 
 
     View.OnKeyListener enterDetector = new View.OnKeyListener()
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity
                     if (event.getAction() == MotionEvent.ACTION_DOWN)
                     {
                         img.setImageResource(R.drawable.ic_settings_pressed);
+                        mDrawerLayout.openDrawer(leftDrawer);
                     }
                     if (event.getAction() == MotionEvent.ACTION_UP)
                     {
@@ -185,15 +190,18 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                     return true;
-                default:
+                case R.id.arrowDown:
                     if (event.getAction() == MotionEvent.ACTION_DOWN)
                     {
-                        img.setImageResource(R.drawable.ic_down_arrow_pressed);
+                        img.setImageResource(R.drawable.ic_history_pressed);
+                        mDrawerLayout.openDrawer(rightDrawer);
                     }
                     if (event.getAction() == MotionEvent.ACTION_UP)
                     {
-                        img.setImageResource(R.drawable.ic_down_arrow_unpressed);
+                        img.setImageResource(R.drawable.ic_history_unpressed);
                     }
+                    return true;
+                default:
                     return true;
             }
             //return false;
@@ -213,11 +221,118 @@ public class MainActivity extends AppCompatActivity
             startHttpRetrieveTask(curWord.getText().toString());
             searchBarStack.push(curWord.getText().toString());
             listInflator(rightDrawer, searchBarStack.getStringArray());
+            mDrawerLayout.closeDrawer(rightDrawer);
         }
         public void test (){}
     };
 
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        timestamp = System.currentTimeMillis()/1000;;
+        setContentView(R.layout.activity_main);
+        loadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        curWord = (EditText) findViewById(R.id.curWord);
+        outputField = (LinearLayout) findViewById(R.id.outputField);
+        //обработчик нажатий Энтер:
+            curWord.setOnKeyListener(enterDetector);
+        //обработчик ввода текста:
+            curWord.addTextChangedListener(searchBarEditDetector);
+        //обработчик тапов в поле ввода
+            curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
+        //переключатель картинок на кнопках
+            leftBtn = (ImageView) findViewById(R.id.arrowLeft);
+            rightBtn = (ImageView) findViewById(R.id.arrowRight);
+            downBtn = (ImageView) findViewById(R.id.arrowDown);
+            settingsBtn = (ImageView) findViewById(R.id.settings);
+            leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            downBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        //дроверы
+            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            leftDrawer = (ScrollView) findViewById(R.id.left_drawer);
+            rightDrawer = (ListView) findViewById(R.id.right_drawer);
+            historyAdapter = new ArrayAdapter<String>
+                    (this, R.layout.drawer_list_item, searchBarStack.getListArray());
+            rightDrawer.setAdapter(historyAdapter);
+            rightDrawer.setOnItemClickListener(suggestionClicked);
+            LayoutInflater inflater = getLayoutInflater();
+            View historyHeader = inflater.inflate(R.layout.drawer_header_item, null, false);
+            rightDrawer.addHeaderView(historyHeader, null, false);
+            View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
+            rightDrawer.addFooterView(historyFooter, null, false);
+    }
 
+    public void clearHistory (View v)
+    {
+        searchBarStack.clear();
+        listInflator(rightDrawer, searchBarStack.getStringArray());
+    }
+
+    public void closeDrawers (View v)
+    {
+        mDrawerLayout.closeDrawer(rightDrawer);
+        mDrawerLayout.closeDrawer(leftDrawer);
+
+    }
+
+    public void sendEmail (View v)
+    {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        switch (v.getId())
+        {
+            case (R.id.emailToAuthorTV):
+                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"vortaristo@gmail.com"});
+                i.putExtra(Intent.EXTRA_SUBJECT, "RUEO онлайн словарь");
+                if (!curWord.getText().toString().isEmpty())
+                {
+                    i.putExtra(Intent.EXTRA_TEXT, "Статья: \"" + curWord.getText().toString()+"\"");
+                }
+                break;
+            case (R.id.emailToDeveloperTV):
+                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"k002422@gmail.com"});
+                i.putExtra(Intent.EXTRA_SUBJECT, "RUEO app");
+                break;
+        }
+        try
+        {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex)
+        {
+            Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            String temp = searchBarStack.getLeft();
+            if (temp != null)
+            {
+                searchBarEditDetectorEnabled = false;
+                curWord.setText(temp);
+                startHttpRetrieveTask(temp);
+                searchBarEditDetectorEnabled = true;
+            }
+            else
+            {
+                if ((System.currentTimeMillis()/1000 - timestamp) < 2)
+                {
+                    System.exit(0);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Press back again in 2 sec to exit app", Toast.LENGTH_LONG).show();
+                    timestamp = System.currentTimeMillis()/1000;
+                }
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     public boolean isCurWordShouldBeErased(boolean flag)
     {
@@ -229,38 +344,6 @@ public class MainActivity extends AppCompatActivity
     {
         historyAdapter.clear();
         historyAdapter.addAll(searchBarStack.getListArray());
-    }
-
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        loadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-        curWord = (EditText) findViewById(R.id.curWord);
-        outputField = (LinearLayout) findViewById(R.id.outputField);
-        leftBtn = (ImageView) findViewById(R.id.arrowLeft);
-        rightBtn = (ImageView) findViewById(R.id.arrowRight);
-        downBtn = (ImageView) findViewById(R.id.arrowDown);
-        settingsBtn = (ImageView) findViewById(R.id.settings);
-        //обработчик нажатий Энтер:
-            curWord.setOnKeyListener(enterDetector);
-        //обработчик ввода текста:
-            curWord.addTextChangedListener(searchBarEditDetector);
-        //обработчик тапов в поле ввода
-            curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
-        //переключатель картинок на кнопках
-            leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            downBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        leftDrawer = (ListView) findViewById(R.id.left_drawer);
-        rightDrawer = (ListView) findViewById(R.id.right_drawer);
-
-        historyAdapter = new ArrayAdapter<String>
-                (this, R.layout.drawer_list_item, searchBarStack.getListArray());
-        rightDrawer.setAdapter(historyAdapter);
-        rightDrawer.setOnItemClickListener(suggestionClicked);
     }
 
     private void startHttpRetrieveTask (String input)

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryDark"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="1dp"
+    android:orientation="vertical"
+    android:padding="3dp">
+
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_esperanto_star"
+        android:text="@string/app_name"
+        android:theme="@style/LeftDrawerItem"
+        android:onClick="closeDrawers"
+        android:layout_margin="1dp"/>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/emailToAuthorTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_mail"
+        android:text="@string/feedback_global"
+        android:theme="@style/LeftDrawerItem"
+        android:onClick="sendEmail"
+        android:layout_margin="1dp"/>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/emailToDeveloperTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_mail"
+        android:text="@string/feedback_app"
+        android:theme="@style/LeftDrawerItem"
+        android:onClick="sendEmail"
+        android:layout_margin="1dp"/>
+</LinearLayout>

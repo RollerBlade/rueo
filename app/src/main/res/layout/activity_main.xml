@@ -36,11 +36,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:text="@string/search_ivitation" />
                 </LinearLayout>
 
                 <ScrollView
@@ -66,18 +61,22 @@
             android:layout_gravity="end"
             android:background="#303F9F"
             android:choiceMode="singleChoice"
+            android:padding="5dp"
             android:divider="@android:color/transparent"
-            android:dividerHeight="0dp" />
+            android:dividerHeight="1dp" />
 
-        <ListView
+        <ScrollView
             android:id="@+id/left_drawer"
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="#303F9F"
-            android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp" />
+            android:background="@color/colorPrimaryDark"
+            android:choiceMode="singleChoice">
+            <include
+                layout="@layout/left_drawer_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
     </android.support.v4.widget.DrawerLayout>
 
 

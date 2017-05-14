@@ -15,4 +15,13 @@
         <item name="editTextColor">#FFF</item>
     </style>
 
+    <style name="LeftDrawerItem" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:padding">3dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+
+    </style>
+
 </resources>

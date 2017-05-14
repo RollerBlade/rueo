@@ -1,6 +1,5 @@
 package com.example.android.rueo.history;
 
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +16,12 @@ public class Stack
     public Stack ()
     {
         arr = new ArrayList<>();
+        pointer = null;
+    }
+
+    public void clear ()
+    {
+        arr.clear();
         pointer = null;
     }
 
@@ -65,7 +70,6 @@ public class Stack
         if (duplicate > -1)
         {
             detete(duplicate);
-            Log.d("ololo", "i is "+ duplicate);
         }
     }
 
