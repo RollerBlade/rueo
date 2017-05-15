@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -105,12 +106,15 @@ public class MainActivity extends AppCompatActivity
                 {
                     isCurWordShouldBeErased(false);
                     searchBarEditDetectorEnabled = false;
-                    curWord.setText(s.toString().substring(start, start+count));
+                    //curWord.setText(s.toString().substring(start, start+count));
+                    //костыль для телефона СС, который не умеет правильно считать =)
+                        int i;
+                        for (i = 0; i < textBefore.length() && s.charAt(i)==textBefore.charAt(i); i++);
+                        curWord.setText(s.subSequence(i,i+1).toString());
                     curWord.setSelection(curWord.getText().length());
                     searchBarEditDetectorEnabled = true;
                 }
                 startAjaxRetrieveTask(curWord.getText().toString());
-
             }
         }
 
@@ -288,7 +292,9 @@ public class MainActivity extends AppCompatActivity
                 i.putExtra(Intent.EXTRA_SUBJECT, "RUEO онлайн словарь");
                 if (!curWord.getText().toString().isEmpty())
                 {
-                    i.putExtra(Intent.EXTRA_TEXT, "Статья: \"" + curWord.getText().toString()+"\"");
+                    i.putExtra(Intent.EXTRA_TEXT,
+                            "Статья: \"" + curWord.getText().toString()+
+                            "\"\nСсылка: http://rueo.ru/sercxo/" + curWord.getText().toString());
                 }
                 break;
             case (R.id.emailToDeveloperTV):
@@ -337,6 +343,7 @@ public class MainActivity extends AppCompatActivity
     public boolean isCurWordShouldBeErased(boolean flag)
     {
         curWordShouldBeErased = flag;
+        Log.d("ololo", "flag is " + curWordShouldBeErased);
         return curWordShouldBeErased;
     }
 
@@ -348,6 +355,7 @@ public class MainActivity extends AppCompatActivity
 
     private void startHttpRetrieveTask (String input)
     {
+        curWord.setSelection(curWord.getText().length());
         if (hrt != null)
         {
             hrt.cancel(false);
@@ -471,13 +479,17 @@ public class MainActivity extends AppCompatActivity
                         title.setText("Возможные совпадения:");
                         //outputField.addView(title);
                     }
+                    if (curWordStrShifter == 0)
+                        curWord.setTextColor(getResources().getColor(R.color.textColor));
                     curWordStrShifter = 0;
+
                 }
                 else
                 {
                     if (curWord.length()>1 && curWord.length() > curWordStrShifter)
                     {
                         curWordStrShifter++;
+                        curWord.setTextColor(getResources().getColor(R.color.searchbarTextErrorColor));
                         startAjaxRetrieveTask(curWord.getText().toString()
                                 .substring(0, curWord.length() - curWordStrShifter));
                         //title.setText("Ошибка ввода!");
@@ -485,6 +497,7 @@ public class MainActivity extends AppCompatActivity
                     else
                     {
                         title.setText("Совпадений не найдено!");
+                        //curWord.setTextColor(getResources().getColor(R.color.searchbarTextErrorColor));
                         //outputField.addView(title);
                     }
                 }
