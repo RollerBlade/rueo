@@ -444,7 +444,7 @@ public class MainActivity extends AppCompatActivity
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
-                searchOutput.setText(Html.fromHtml(s).toString());
+                searchOutput.setText(Html.fromHtml(s));
             }
             else
             {
