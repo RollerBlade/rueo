@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity
                 if (!curWord.getText().toString().isEmpty() && !ajaxMode)
                 {
                     i.putExtra(Intent.EXTRA_SUBJECT, "rueo.ru, " +
-                            " статья: \"" + curWord.getText().toString());
+                            " статья: \"" + curWord.getText().toString()+"\"");
                 }
                 else
                 {
@@ -314,7 +314,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 if (!curWord.getText().toString().isEmpty() && !ajaxMode)
                 {
-                    i.putExtra(Intent.EXTRA_TEXT, "Ссылка: http://rueo.ru/sercxo/" + curWord.getText().toString());
+                    i.putExtra(Intent.EXTRA_TEXT, "Ссылка: " +
+                            NetworkUtils.buildUrl(curWord.getText().toString(), "http"));
                 }
                 break;
             case (R.id.emailToDeveloperTV):
