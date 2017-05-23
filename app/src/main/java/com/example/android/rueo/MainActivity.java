@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity
     int curWordStrShifter = 0;
     boolean searchBarEditDetectorEnabled = true;
     boolean curWordShouldBeErased = false;
+    boolean ajaxMode = true;
     Stack searchBarStack = new Stack();
 
 
@@ -290,12 +291,18 @@ public class MainActivity extends AppCompatActivity
         {
             case (R.id.emailToAuthorTV):
                 i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"vortaristo@gmail.com"});
-                i.putExtra(Intent.EXTRA_SUBJECT, "RUEO онлайн словарь");
-                if (!curWord.getText().toString().isEmpty())
+                if (!curWord.getText().toString().isEmpty() && !ajaxMode)
                 {
-                    i.putExtra(Intent.EXTRA_TEXT,
-                            "Статья: \"" + curWord.getText().toString()+
-                            "\"\nСсылка: http://rueo.ru/sercxo/" + curWord.getText().toString());
+                    i.putExtra(Intent.EXTRA_SUBJECT, "rueo.ru, " +
+                            " статья: \"" + curWord.getText().toString());
+                }
+                else
+                {
+                    i.putExtra(Intent.EXTRA_SUBJECT, "RUEO онлайн словарь");
+                }
+                if (!curWord.getText().toString().isEmpty() && !ajaxMode)
+                {
+                    i.putExtra(Intent.EXTRA_TEXT, "Ссылка: http://rueo.ru/sercxo/" + curWord.getText().toString());
                 }
                 break;
             case (R.id.emailToDeveloperTV):
@@ -367,6 +374,7 @@ public class MainActivity extends AppCompatActivity
         }
         hrt = new httpRetrieveTask();
         hrt.execute(input);
+        ajaxMode = false;
     }
 
     private void startAjaxRetrieveTask (String input)
@@ -381,6 +389,7 @@ public class MainActivity extends AppCompatActivity
         }
         art = new ajaxRetrieveTask();
         art.execute(input);
+        ajaxMode = true;
     }
 
     //в соседнем треде получаем словарную статью, кромсаем ее и выводим
