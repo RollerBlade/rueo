@@ -387,6 +387,7 @@ public class MainActivity extends AppCompatActivity
         hrt = new httpRetrieveTask();
         hrt.execute(input);
         ajaxMode = false;
+        curWord.setTextColor(getResources().getColor(R.color.textColor));
     }
 
     private void startAjaxRetrieveTask (String input)
@@ -460,6 +461,9 @@ public class MainActivity extends AppCompatActivity
             super.onPreExecute();
             outputField.removeAllViews();
             loadingIndicator.setVisibility(View.VISIBLE);
+            if (curWordStrShifter == 0)
+                curWord.setTextColor(getResources().getColor(R.color.textColor));
+
         }
 
         @Override
