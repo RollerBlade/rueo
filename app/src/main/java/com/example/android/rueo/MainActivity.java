@@ -25,7 +25,6 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity
     //поле для вывода статей и подсказок
         LinearLayout outputField;
     //кнопки управления справа от серчбара
-        ImageView leftBtn, rightBtn, downBtn, settingsBtn;
+        ImageView leftBtn, rightBtn, downBtn, settingsBtn, clrButton;
     //для истории в правом дровере
         ArrayAdapter<String> historyAdapter;
     //дроверы
@@ -148,6 +147,17 @@ public class MainActivity extends AppCompatActivity
 
             switch (img.getId())
             {
+                case R.id.clearSearchBar:
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        img.setImageResource(R.drawable.ic_clear_pressed);
+                        curWord.setText("");
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP)
+                    {
+                        img.setImageResource(R.drawable.ic_clear_unpressed);
+                    }
+                    return true;
                 case R.id.settings:
                     if (event.getAction() == MotionEvent.ACTION_DOWN)
                     {
@@ -250,10 +260,12 @@ public class MainActivity extends AppCompatActivity
             rightBtn = (ImageView) findViewById(R.id.arrowRight);
             downBtn = (ImageView) findViewById(R.id.arrowDown);
             settingsBtn = (ImageView) findViewById(R.id.settings);
+            clrButton = (ImageView) findViewById(R.id.clearSearchBar);
             leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
             rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
             downBtn.setOnTouchListener(buttonOnClickImgSwapper);
             settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
+            clrButton.setOnTouchListener(buttonOnClickImgSwapper);
         //дроверы
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
             leftDrawer = (ScrollView) findViewById(R.id.left_drawer);
