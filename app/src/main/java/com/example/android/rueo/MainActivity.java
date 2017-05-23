@@ -259,13 +259,14 @@ public class MainActivity extends AppCompatActivity
             rightDrawer = (ListView) findViewById(R.id.right_drawer);
             historyAdapter = new ArrayAdapter<String>
                     (this, R.layout.drawer_list_item, searchBarStack.getListArray());
-            rightDrawer.setAdapter(historyAdapter);
+
             rightDrawer.setOnItemClickListener(suggestionClicked);
             LayoutInflater inflater = getLayoutInflater();
             View historyHeader = inflater.inflate(R.layout.drawer_header_item, null, false);
             rightDrawer.addHeaderView(historyHeader, null, false);
             View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
             rightDrawer.addFooterView(historyFooter, null, false);
+            rightDrawer.setAdapter(historyAdapter);
     }
 
     public void clearHistory (View v)

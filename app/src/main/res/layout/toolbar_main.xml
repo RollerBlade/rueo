@@ -39,29 +39,29 @@
 
         <ImageView
             android:id="@+id/arrowDown"
+            android:layout_height="match_parent"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_history_unpressed" />
+            android:src="@drawable/ic_history_unpressed" />
 
         <ImageView
             android:id="@+id/arrowLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="90"
-            app:srcCompat="@drawable/ic_down_arrow_unpressed" />
+            android:src="@drawable/ic_down_arrow_unpressed" />
 
         <ImageView
             android:id="@+id/arrowRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="270"
-            app:srcCompat="@drawable/ic_down_arrow_unpressed" />
+            android:src="@drawable/ic_down_arrow_unpressed" />
 
         <ImageView
             android:id="@+id/settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_settings_unpressed" />
+            android:src="@drawable/ic_settings_unpressed" />
 
     </LinearLayout>
 </android.support.v7.widget.Toolbar>
