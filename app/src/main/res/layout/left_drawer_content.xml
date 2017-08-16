@@ -13,12 +13,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/ic_esperanto_star"
+        android:drawableStart="@drawable/ic_esperanto_star"
         android:text="@string/app_name"
         android:theme="@style/LeftDrawerItem"
         android:background="@color/colorPrimaryDark"
-        android:textSize="35dp"
+        android:textSize="35sp"
         android:onClick="closeDrawers"
         android:layout_margin="1dp"/>
+
+    <ExpandableListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/emailToAuthorTV"

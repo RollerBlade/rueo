@@ -1,4 +1,4 @@
-package com.example.android.rueo.history;
+package com.rueo.android.rueo.history;
 
 
 import java.util.ArrayList;

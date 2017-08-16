@@ -1,4 +1,4 @@
-package com.example.android.rueo.history;
+package com.rueo.android.rueo.history;
 
 /**
  * Created by RollerBlade on 12.05.2017.

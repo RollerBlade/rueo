@@ -1,4 +1,4 @@
-package com.example.android.rueo.network;
+package com.rueo.android.rueo.network;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
