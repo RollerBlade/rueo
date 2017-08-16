@@ -12,13 +12,19 @@ public class InputParser
     //метод принимает хттп страницы rueo со статьей и убирает лишнее
     public static String httpParser (String input)
     {
-        //TODO поправить окраску текста
         String output;
         Document doc = Jsoup.parse(input);
         Element div = doc.select("div.search_result").first();
         div.select("div.kom").remove();
         output = div.outerHtml();
         return output;
+    }
+
+    public static Boolean pageExists (String input)
+    {
+        if (input.contains("Подходящей словарной статьи не найдено"))
+            return false;
+        return true;
     }
 
     //метод парсит JSON-ответ на AJAX запрос страницы при вводе текста

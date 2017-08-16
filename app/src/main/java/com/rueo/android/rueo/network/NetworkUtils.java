@@ -47,7 +47,8 @@ public class NetworkUtils
     /*
     Метод возвращает содержимое http запроса по URL
     */
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
+    public static String getResponseFromHttpUrl(URL url) throws IOException
+    {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try
         {

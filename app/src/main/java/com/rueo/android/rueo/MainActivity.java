@@ -36,6 +36,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import static com.rueo.android.rueo.network.InputParser.ajaxParser;
 import static com.rueo.android.rueo.network.InputParser.httpParser;
+import static com.rueo.android.rueo.network.InputParser.pageExists;
 
 import com.rueo.android.rueo.StringsParsing.StringParser;
 import com.rueo.android.rueo.history.Stack;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         ArrayAdapter<String> historyAdapter;
     //дроверы
         private DrawerLayout mDrawerLayout;
-        private ListView rightDrawer;
+        public ListView rightDrawer;
         private ScrollView leftDrawer;
     long timestamp;
     ProgressBar loadingIndicator;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity
     public boolean searchBarEditDetectorEnabled = true;
     boolean curWordShouldBeErased = false;
     boolean ajaxMode = true;
-    Stack searchBarStack = new Stack();
+    public Stack searchBarStack = new Stack();
 
 
     View.OnKeyListener enterDetector = new View.OnKeyListener()
@@ -378,13 +379,13 @@ public class MainActivity extends AppCompatActivity
         return curWordShouldBeErased;
     }
 
-    private void listInflator (ListView myList, String[] array)
+    public void listInflator (ListView myList, String[] array)
     {
         historyAdapter.clear();
         historyAdapter.addAll(searchBarStack.getListArray());
     }
 
-    private void startHttpRetrieveTask (String input)
+    public void startHttpRetrieveTask (String input)
     {
         curWord.setSelection(curWord.getText().length());
         if (hrt != null)
@@ -454,20 +455,27 @@ public class MainActivity extends AppCompatActivity
             if (s != null && !s.equals(""))
             {
                 s = httpParser(s);
-                SpannableString ss = new SpannableString(Html.fromHtml(s));
-                ss = StringParser.addAHrefToEveryWord(ss, MainActivity.this);
-                Log.d("sout", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                Log.d("sout", s.toString());
-                Log.d("sout", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
-                searchOutput.setText(ss);
-                searchOutput.setMovementMethod(LinkMovementMethod.getInstance());
+                if (pageExists(s))
+                {
+                    SpannableString ss = new SpannableString(Html.fromHtml(s));
+                    ss = StringParser.addAHrefToEveryWord(ss, MainActivity.this);
+//                    Log.d("sout", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+//                    Log.d("sout", s.toString());
+//                    Log.d("sout", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                    searchOutput.setText(ss);
+                    searchOutput.setMovementMethod(LinkMovementMethod.getInstance());
+                    isCurWordShouldBeErased(true);
+                }
+                else
+                {
+                    startAjaxRetrieveTask(curWord.getText().toString());
+                }
             }
             else
             {
                 searchOutput.setText(R.string.network_error);
+                isCurWordShouldBeErased(true);
             }
-            isCurWordShouldBeErased(true);
         }
     }
 

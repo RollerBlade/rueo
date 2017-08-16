@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -74,7 +75,15 @@ public class StringParser {
                             con.curWord.setText(toCurWord);
                             con.curWord.setSelection(toCurWord.length());
                             con.searchBarEditDetectorEnabled = true;
-                            con.startAjaxRetrieveTask(toCurWord);
+                            con.searchBarStack.push(toCurWord);
+                            con.listInflator(con.rightDrawer, con.searchBarStack.getStringArray());
+                            con.startHttpRetrieveTask(toCurWord);
+                        }
+
+                        @Override
+                        public void updateDrawState(TextPaint ds)
+                        {
+                            ds.setUnderlineText(false);
                         }
                     }, i-(wordLength-1), i+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
