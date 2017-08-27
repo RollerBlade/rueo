@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,7 +56,8 @@ public class MainActivity extends AppCompatActivity
         ArrayAdapter<String> historyAdapter;
     //дроверы
         private DrawerLayout mDrawerLayout;
-        public ListView rightDrawer;
+        public ListView historyLogInDrawer;
+        private LinearLayout rightDrawer;
         private ScrollView leftDrawer;
     long timestamp;
     ProgressBar loadingIndicator;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity
     int curWordStrShifter = 0;
     public boolean searchBarEditDetectorEnabled = true;
     boolean curWordShouldBeErased = false;
+    boolean shouldBeAddedToHistory = true;
     boolean ajaxMode = true;
     public Stack searchBarStack = new Stack();
 
@@ -76,9 +79,8 @@ public class MainActivity extends AppCompatActivity
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
                     && (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                startHttpRetrieveTask(curWord.getText().toString());
-                searchBarStack.push(curWord.getText().toString());
-                listInflator(rightDrawer, searchBarStack.getStringArray());
+                if (!curWord.getText().toString().isEmpty())
+                    startHttpRetrieveTask(curWord.getText().toString());
             }
             return false;
         }
@@ -196,6 +198,7 @@ public class MainActivity extends AppCompatActivity
                         {
                             searchBarEditDetectorEnabled = false;
                             curWord.setText(temp);
+                            shouldBeAddedToHistory = false;
                             startHttpRetrieveTask(temp);
                             searchBarEditDetectorEnabled = true;
                         }
@@ -214,6 +217,7 @@ public class MainActivity extends AppCompatActivity
                         {
                             searchBarEditDetectorEnabled = false;
                             curWord.setText(temp);
+                            shouldBeAddedToHistory = false;
                             startHttpRetrieveTask(temp);
                             searchBarEditDetectorEnabled = true;
                         }
@@ -243,8 +247,6 @@ public class MainActivity extends AppCompatActivity
             curWord.setSelection(curWord.getText().length());
             searchBarEditDetectorEnabled = true;
             startHttpRetrieveTask(curWord.getText().toString());
-            searchBarStack.push(curWord.getText().toString());
-            listInflator(rightDrawer, searchBarStack.getStringArray());
             mDrawerLayout.closeDrawer(rightDrawer);
         }
         public void test (){}
@@ -280,23 +282,25 @@ public class MainActivity extends AppCompatActivity
         //дроверы
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
             leftDrawer = (ScrollView) findViewById(R.id.left_drawer);
-            rightDrawer = (ListView) findViewById(R.id.right_drawer);
+            rightDrawer = (LinearLayout) findViewById(R.id.right_drawer);
+            historyLogInDrawer = (ListView) findViewById(R.id.history_log);
             historyAdapter = new ArrayAdapter<String>
                     (this, R.layout.drawer_list_item, searchBarStack.getListArray());
 
-            rightDrawer.setOnItemClickListener(suggestionClicked);
+            historyLogInDrawer.setBackgroundColor(ContextCompat.getColor(this, R.color.background));
+            historyLogInDrawer.setOnItemClickListener(suggestionClicked);
             LayoutInflater inflater = getLayoutInflater();
             View historyHeader = inflater.inflate(R.layout.drawer_header_item, null, false);
-            rightDrawer.addHeaderView(historyHeader, null, false);
-            View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
-            rightDrawer.addFooterView(historyFooter, null, false);
-            rightDrawer.setAdapter(historyAdapter);
+            historyLogInDrawer.addHeaderView(historyHeader, null, false);
+            //View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
+            //rightDrawer.addFooterView(historyFooter, null, false);
+            historyLogInDrawer.setAdapter(historyAdapter);
     }
 
     public void clearHistory (View v)
     {
         searchBarStack.clear();
-        listInflator(rightDrawer, searchBarStack.getStringArray());
+        listInflator(historyLogInDrawer, searchBarStack.getStringArray());
     }
 
     public void closeDrawers (View v)
@@ -352,6 +356,7 @@ public class MainActivity extends AppCompatActivity
             {
                 searchBarEditDetectorEnabled = false;
                 curWord.setText(temp);
+                shouldBeAddedToHistory = false;
                 startHttpRetrieveTask(temp);
                 searchBarEditDetectorEnabled = true;
             }
@@ -465,6 +470,16 @@ public class MainActivity extends AppCompatActivity
                     searchOutput.setText(ss);
                     searchOutput.setMovementMethod(LinkMovementMethod.getInstance());
                     isCurWordShouldBeErased(true);
+
+                    if (shouldBeAddedToHistory)
+                    {
+                        searchBarStack.push(curWord.getText().toString());
+                        listInflator(historyLogInDrawer, searchBarStack.getStringArray());
+                    }
+                    else
+                    {
+                        shouldBeAddedToHistory = true;
+                    }
                 }
                 else
                 {
@@ -569,9 +584,4 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
-
-    //TODO (1) продумать случай, когда статьи не найдено и предлагают похожее слово (напр. "er")
-    //TODO (2) тыкание в слово в статье (два случая - ссылка и просто слово)
-    //TODO (3) добавить обработку случая, когда поиск не нашел статьи: вывалить аякс, если аякс - 0, вываодит что-то.
 }

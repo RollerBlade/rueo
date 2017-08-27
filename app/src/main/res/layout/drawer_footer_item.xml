@@ -15,5 +15,7 @@
         android:drawableLeft="@drawable/ic_delete"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/textColor"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
 </LinearLayout>

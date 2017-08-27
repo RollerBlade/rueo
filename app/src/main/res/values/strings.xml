@@ -3,7 +3,7 @@
     <string name="searchBarHint">Введите слово!</string>
     <string name="network_error">Ошибка связи! Попробуйте позже</string>
     <string name="search_ivitation">Введите слово!</string>
-    <string name="history_header">История поиска:</string>
+    <string name="history_header">История:</string>
     <string name="history_footer">Очистить историю</string>
     <string name="feedback_global">Авторам словаря</string>
     <string name="feedback_app">Автору приложения</string>

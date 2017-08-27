@@ -25,7 +25,7 @@ public class StringParser {
     public static SpannableString addAHrefToEveryWord (SpannableString ss, final MainActivity con)
     {
         int wordLength = 0;
-        Character[] tokens = {' ', '.', ',', ';', ':', '(', ')', '\n'};
+        Character[] tokens = {' ', '.', ',', '!', '?', '»', '«', ';', ':', '(', ')','\u00a0', '\n'};
         final Character[] diacriticTokens = {'́'};
         Boolean wordEnded = false;
         for (int i = 0; i < ss.length(); i++)
@@ -70,13 +70,11 @@ public class StringParser {
                             //Log.d("sout", "onClick [" + s.subSequence(start, end) + "]");
                             String toCurWord = s.subSequence(start, end).toString();
                             toCurWord = toCurWord.replace(diacriticTokens[0].toString(), "");
-                            Log.d("sout", toCurWord);
+                            //Log.d("sout", toCurWord);
                             con.searchBarEditDetectorEnabled = false;
                             con.curWord.setText(toCurWord);
                             con.curWord.setSelection(toCurWord.length());
                             con.searchBarEditDetectorEnabled = true;
-                            con.searchBarStack.push(toCurWord);
-                            con.listInflator(con.rightDrawer, con.searchBarStack.getStringArray());
                             con.startHttpRetrieveTask(toCurWord);
                         }
 
@@ -90,7 +88,7 @@ public class StringParser {
                 wordLength = 0;
             }
         }
-        ss.setSpan(new ForegroundColorSpan(Color.BLACK), 0, ss.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        //ss.setSpan(new ForegroundColorSpan(Color.BLACK), 0, ss.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return ss;
     }
 

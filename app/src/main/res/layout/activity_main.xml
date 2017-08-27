@@ -54,29 +54,9 @@
 
         </LinearLayout>
 
-        <ListView
-            android:id="@+id/right_drawer"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:background="#303F9F"
-            android:choiceMode="singleChoice"
-            android:padding="5dp"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="1dp" />
+        <include layout="@layout/right_drawer_content"/>
 
-        <ScrollView
-            android:id="@+id/left_drawer"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:background="@color/colorPrimaryDark"
-            android:choiceMode="singleChoice">
-            <include
-                layout="@layout/left_drawer_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </ScrollView>
+        <include layout="@layout/left_drawer_content"/>
     </android.support.v4.widget.DrawerLayout>
 
 

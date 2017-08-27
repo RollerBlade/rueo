@@ -1,9 +1,12 @@
 package com.rueo.android.rueo.network;
 
+import android.util.Log;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.json.*;
+import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 
@@ -16,7 +19,12 @@ public class InputParser
         Document doc = Jsoup.parse(input);
         Element div = doc.select("div.search_result").first();
         div.select("div.kom").remove();
+        Elements hrefs = div.select("a[href]");
+        hrefs.unwrap();
         output = div.outerHtml();
+
+        //Log.d("sout", output);
+
         return output;
     }
 
