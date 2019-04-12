@@ -11,3 +11,5 @@ local.properties
 SVG/
 app/libs/
 app/release/*
+app/src/main/res/Network/
+app/src/main/res/drawable/arrows/
