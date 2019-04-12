@@ -2,21 +2,17 @@ package com.rueo.android.rueo;
 
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -32,33 +28,34 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import static com.rueo.android.rueo.network.InputParser.ajaxParser;
-import static com.rueo.android.rueo.network.InputParser.httpParser;
-import static com.rueo.android.rueo.network.InputParser.pageExists;
 
 import com.rueo.android.rueo.StringsParsing.StringParser;
 import com.rueo.android.rueo.history.Stack;
 import com.rueo.android.rueo.network.NetworkUtils;
 
-public class MainActivity extends AppCompatActivity
-{
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+
+import static com.rueo.android.rueo.network.InputParser.ajaxParser;
+import static com.rueo.android.rueo.network.InputParser.httpParser;
+import static com.rueo.android.rueo.network.InputParser.pageExists;
+
+public class MainActivity extends AppCompatActivity {
     //серчбар
-        public EditText curWord;
-        String curWordStr;
+    public EditText curWord;
+    String curWordStr;
     //поле для вывода статей и подсказок
-        LinearLayout outputField;
+    LinearLayout outputField;
     //кнопки управления справа от серчбара
-        ImageView leftBtn, rightBtn, downBtn, settingsBtn, clrButton, menuBtn;
+    ImageView leftBtn, rightBtn, downBtn, settingsBtn, clrButton, menuBtn;
     //для истории в правом дровере
-        ArrayAdapter<String> historyAdapter;
+    ArrayAdapter<String> historyAdapter;
     //дроверы
-        private DrawerLayout mDrawerLayout;
-        public ListView historyLogInDrawer;
-        private LinearLayout rightDrawer;
-        private ScrollView leftDrawer;
+    private DrawerLayout mDrawerLayout;
+    public ListView historyLogInDrawer;
+    private LinearLayout rightDrawer;
+    private ScrollView leftDrawer;
     long timestamp;
     ProgressBar loadingIndicator;
     httpRetrieveTask hrt = null;
@@ -71,56 +68,50 @@ public class MainActivity extends AppCompatActivity
     public Stack searchBarStack = new Stack();
 
 
-    View.OnKeyListener enterDetector = new View.OnKeyListener()
-    {
+    View.OnKeyListener enterDetector = new View.OnKeyListener() {
         @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event)
-        {
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
             if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                    && (keyCode == KeyEvent.KEYCODE_ENTER))
-            {
+                    && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                 if (!curWord.getText().toString().isEmpty())
                     startHttpRetrieveTask(curWord.getText().toString());
             }
             return false;
         }
-        private void test (){}
+
+        private void test() {
+        }
     };
-    TextWatcher searchBarEditDetector = new TextWatcher()
-    {
+    TextWatcher searchBarEditDetector = new TextWatcher() {
         String textBefore = null, textAfter = null;
         private int mPreviousLength;
         private boolean mBackSpace;
 
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after)
-        {
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             textBefore = s.toString();
             mPreviousLength = s.length();
         }
 
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count)
-        {
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
             textAfter = s.toString();
-            if (s.length()>0 && searchBarEditDetectorEnabled)
-            {
+            if (s.length() > 0 && searchBarEditDetectorEnabled) {
                 //костыль обработки бэкспейс
-                mBackSpace = mPreviousLength == (s.length()+1);
-                if (mBackSpace)
-                {
+                mBackSpace = mPreviousLength == (s.length() + 1);
+                if (mBackSpace) {
                     isCurWordShouldBeErased(false);
                 }
                 //очищаем серчбар, если надо
-                if (curWordShouldBeErased)
-                {
+                if (curWordShouldBeErased) {
                     isCurWordShouldBeErased(false);
                     searchBarEditDetectorEnabled = false;
                     //curWord.setText(s.toString().substring(start, start+count));
                     //костыль для телефона СС, который не умеет правильно считать =)
-                        int i;
-                        for (i = 0; i < textBefore.length() && s.charAt(i)==textBefore.charAt(i); i++);
-                        curWord.setText(s.subSequence(i,i+1).toString());
+                    int i;
+                    for (i = 0; i < textBefore.length() && s.charAt(i) == textBefore.charAt(i); i++)
+                        ;
+                    curWord.setText(s.subSequence(i, i + 1).toString());
                     curWord.setSelection(curWord.getText().length());
                     searchBarEditDetectorEnabled = true;
                 }
@@ -129,73 +120,60 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public void afterTextChanged(Editable s)
-        {
-            if (s.length()==0)
-            {
+        public void afterTextChanged(Editable s) {
+            if (s.length() == 0) {
                 outputField.removeAllViews();
             }
             curWordStr = curWord.getText().toString();
         }
     };
-    TextView.OnTouchListener CurWordOnclickFlagDisabler = new TextView.OnTouchListener()
-    {
+    TextView.OnTouchListener CurWordOnclickFlagDisabler = new TextView.OnTouchListener() {
         @Override
-        public boolean onTouch(View v, MotionEvent a)
-        {
+        public boolean onTouch(View v, MotionEvent a) {
             isCurWordShouldBeErased(false);
             return false;
         }
-        private void test (){}
+
+        private void test() {
+        }
     };
-    ImageView.OnTouchListener buttonOnClickImgSwapper = new ImageView.OnTouchListener()
-    {
+    ImageView.OnTouchListener buttonOnClickImgSwapper = new ImageView.OnTouchListener() {
         @Override
-        public boolean onTouch(View v, MotionEvent event)
-        {
+        public boolean onTouch(View v, MotionEvent event) {
             ImageView img = (ImageView) v;
 
-            switch (img.getId())
-            {
+            switch (img.getId()) {
                 case R.id.menuButton:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         mDrawerLayout.openDrawer(leftDrawer);
                     }
                     return true;
                 case R.id.clearSearchBar:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         img.setImageResource(R.drawable.ic_clear_pressed);
                         curWord.setText("");
                     }
-                    if (event.getAction() == MotionEvent.ACTION_UP)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
                         img.setImageResource(R.drawable.ic_clear_unpressed);
                     }
                     return true;
                 case R.id.settings:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         img.setImageResource(R.drawable.ic_settings_pressed);
                         mDrawerLayout.openDrawer(leftDrawer);
                     }
-                    if (event.getAction() == MotionEvent.ACTION_UP)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
                         img.setImageResource(R.drawable.ic_settings_unpressed);
                     }
                     return true;
                 case R.id.arrowLeft:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         img.setImageResource(R.drawable.ic_down_arrow_pressed);
                     }
-                    if (event.getAction() == MotionEvent.ACTION_UP)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
                         img.setImageResource(R.drawable.ic_down_arrow_unpressed);
                         String temp = searchBarStack.getLeft();
-                        if (temp != null)
-                        {
+                        if (temp != null) {
                             searchBarEditDetectorEnabled = false;
                             curWord.setText(temp);
                             shouldBeAddedToHistory = false;
@@ -205,16 +183,13 @@ public class MainActivity extends AppCompatActivity
                     }
                     return true;
                 case R.id.arrowRight:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         img.setImageResource(R.drawable.ic_down_arrow_pressed);
                     }
-                    if (event.getAction() == MotionEvent.ACTION_UP)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
                         img.setImageResource(R.drawable.ic_down_arrow_unpressed);
                         String temp = searchBarStack.getRight();
-                        if (temp != null)
-                        {
+                        if (temp != null) {
                             searchBarEditDetectorEnabled = false;
                             curWord.setText(temp);
                             shouldBeAddedToHistory = false;
@@ -224,8 +199,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     return true;
                 case R.id.arrowDown:
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         mDrawerLayout.openDrawer(rightDrawer);
                     }
                     return true;
@@ -234,13 +208,13 @@ public class MainActivity extends AppCompatActivity
             }
             //return false;
         }
-        private void test (){}
+
+        private void test() {
+        }
     };
-    ListView.OnItemClickListener suggestionClicked = new ListView.OnItemClickListener()
-    {
+    ListView.OnItemClickListener suggestionClicked = new ListView.OnItemClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-        {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TextView cur = (TextView) view;
             searchBarEditDetectorEnabled = false;
             curWord.setText(cur.getText());
@@ -249,127 +223,112 @@ public class MainActivity extends AppCompatActivity
             startHttpRetrieveTask(curWord.getText().toString());
             mDrawerLayout.closeDrawer(rightDrawer);
         }
-        public void test (){}
+
+        public void test() {
+        }
     };
 
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        timestamp = System.currentTimeMillis()/1000;;
+        timestamp = System.currentTimeMillis() / 1000;
+        ;
         setContentView(R.layout.activity_main);
         loadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         curWord = (EditText) findViewById(R.id.curWord);
         outputField = (LinearLayout) findViewById(R.id.outputField);
         //обработчик нажатий Энтер:
-            curWord.setOnKeyListener(enterDetector);
+        curWord.setOnKeyListener(enterDetector);
         //обработчик ввода текста:
-            curWord.addTextChangedListener(searchBarEditDetector);
+        curWord.addTextChangedListener(searchBarEditDetector);
         //обработчик тапов в поле ввода
-            curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
+        curWord.setOnTouchListener(CurWordOnclickFlagDisabler);
         //переключатель картинок на кнопках
-            leftBtn = (ImageView) findViewById(R.id.arrowLeft);
-            rightBtn = (ImageView) findViewById(R.id.arrowRight);
-            downBtn = (ImageView) findViewById(R.id.arrowDown);
-            settingsBtn = (ImageView) findViewById(R.id.settings);
-            clrButton = (ImageView) findViewById(R.id.clearSearchBar);
-            menuBtn = (ImageView) findViewById(R.id.menuButton);
-            leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            downBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
-            clrButton.setOnTouchListener(buttonOnClickImgSwapper);
-            menuBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        leftBtn = (ImageView) findViewById(R.id.arrowLeft);
+        rightBtn = (ImageView) findViewById(R.id.arrowRight);
+        downBtn = (ImageView) findViewById(R.id.arrowDown);
+        settingsBtn = (ImageView) findViewById(R.id.settings);
+        clrButton = (ImageView) findViewById(R.id.clearSearchBar);
+        menuBtn = (ImageView) findViewById(R.id.menuButton);
+        leftBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        rightBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        downBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        settingsBtn.setOnTouchListener(buttonOnClickImgSwapper);
+        clrButton.setOnTouchListener(buttonOnClickImgSwapper);
+        menuBtn.setOnTouchListener(buttonOnClickImgSwapper);
         //дроверы
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            leftDrawer = (ScrollView) findViewById(R.id.left_drawer);
-            rightDrawer = (LinearLayout) findViewById(R.id.right_drawer);
-            historyLogInDrawer = (ListView) findViewById(R.id.history_log);
-            historyAdapter = new ArrayAdapter<String>
-                    (this, R.layout.drawer_list_item, searchBarStack.getListArray());
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        leftDrawer = (ScrollView) findViewById(R.id.left_drawer);
+        rightDrawer = (LinearLayout) findViewById(R.id.right_drawer);
+        historyLogInDrawer = (ListView) findViewById(R.id.history_log);
+        historyAdapter = new ArrayAdapter<String>
+                (this, R.layout.drawer_list_item, searchBarStack.getListArray());
 
-            historyLogInDrawer.setBackgroundColor(ContextCompat.getColor(this, R.color.background));
-            historyLogInDrawer.setOnItemClickListener(suggestionClicked);
-            LayoutInflater inflater = getLayoutInflater();
-            View historyHeader = inflater.inflate(R.layout.drawer_header_item, null, false);
-            historyLogInDrawer.addHeaderView(historyHeader, null, false);
-            //View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
-            //rightDrawer.addFooterView(historyFooter, null, false);
-            historyLogInDrawer.setAdapter(historyAdapter);
+        historyLogInDrawer.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        historyLogInDrawer.setOnItemClickListener(suggestionClicked);
+        LayoutInflater inflater = getLayoutInflater();
+        View historyHeader = inflater.inflate(R.layout.drawer_header_item, null, false);
+        historyLogInDrawer.addHeaderView(historyHeader, null, false);
+        //View historyFooter = inflater.inflate(R.layout.drawer_footer_item, null, false);
+        //rightDrawer.addFooterView(historyFooter, null, false);
+        historyLogInDrawer.setAdapter(historyAdapter);
     }
 
-    public void clearHistory (View v)
-    {
+    public void clearHistory(View v) {
         searchBarStack.clear();
         listInflator(historyLogInDrawer, searchBarStack.getStringArray());
     }
 
-    public void closeDrawers (View v)
-    {
+    public void closeDrawers(View v) {
         mDrawerLayout.closeDrawer(rightDrawer);
         mDrawerLayout.closeDrawer(leftDrawer);
 
     }
 
-    public void sendEmail (View v)
-    {
+    public void sendEmail(View v) {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
-        switch (v.getId())
-        {
+        switch (v.getId()) {
             case (R.id.emailToAuthorTV):
-                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"vortaristo@gmail.com"});
-                if (!curWord.getText().toString().isEmpty() && !ajaxMode)
-                {
+                i.putExtra(Intent.EXTRA_EMAIL, new String[]{"vortaristo@gmail.com"});
+                if (!curWord.getText().toString().isEmpty() && !ajaxMode) {
                     i.putExtra(Intent.EXTRA_SUBJECT, "rueo.ru, " +
-                            " статья: \"" + curWord.getText().toString()+"\"");
-                }
-                else
-                {
+                            " статья: \"" + curWord.getText().toString() + "\"");
+                } else {
                     i.putExtra(Intent.EXTRA_SUBJECT, "RUEO онлайн словарь");
                 }
-                if (!curWord.getText().toString().isEmpty() && !ajaxMode)
-                {
+                if (!curWord.getText().toString().isEmpty() && !ajaxMode) {
                     i.putExtra(Intent.EXTRA_TEXT, "Ссылка: " +
                             NetworkUtils.buildUrl(curWord.getText().toString(), "http"));
                 }
                 break;
             case (R.id.emailToDeveloperTV):
-                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"k002422@gmail.com"});
+                i.putExtra(Intent.EXTRA_EMAIL, new String[]{"k002422@gmail.com"});
                 i.putExtra(Intent.EXTRA_SUBJECT, "RUEO app");
                 break;
         }
-        try
-        {
+        try {
             startActivity(Intent.createChooser(i, "Send mail..."));
-        } catch (android.content.ActivityNotFoundException ex)
-        {
+        } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             String temp = searchBarStack.getLeft();
-            if (temp != null)
-            {
+            if (temp != null) {
                 searchBarEditDetectorEnabled = false;
                 curWord.setText(temp);
                 shouldBeAddedToHistory = false;
                 startHttpRetrieveTask(temp);
                 searchBarEditDetectorEnabled = true;
-            }
-            else
-            {
-                if ((System.currentTimeMillis()/1000 - timestamp) < 2)
-                {
+            } else {
+                if ((System.currentTimeMillis() / 1000 - timestamp) < 2) {
                     System.exit(0);
-                }
-                else
-                {
+                } else {
                     Toast.makeText(MainActivity.this, "Press back again in 2 sec to exit app", Toast.LENGTH_LONG).show();
-                    timestamp = System.currentTimeMillis()/1000;
+                    timestamp = System.currentTimeMillis() / 1000;
                 }
             }
             return true;
@@ -377,28 +336,23 @@ public class MainActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    public boolean isCurWordShouldBeErased(boolean flag)
-    {
+    public boolean isCurWordShouldBeErased(boolean flag) {
         curWordShouldBeErased = flag;
         Log.d("ololo", "flag is " + curWordShouldBeErased);
         return curWordShouldBeErased;
     }
 
-    public void listInflator (ListView myList, String[] array)
-    {
+    public void listInflator(ListView myList, String[] array) {
         historyAdapter.clear();
         historyAdapter.addAll(searchBarStack.getListArray());
     }
 
-    public void startHttpRetrieveTask (String input)
-    {
+    public void startHttpRetrieveTask(String input) {
         curWord.setSelection(curWord.getText().length());
-        if (hrt != null)
-        {
+        if (hrt != null) {
             hrt.cancel(false);
         }
-        if (art != null)
-        {
+        if (art != null) {
             art.cancel(false);
         }
         hrt = new httpRetrieveTask();
@@ -407,14 +361,11 @@ public class MainActivity extends AppCompatActivity
         curWord.setTextColor(getResources().getColor(R.color.textColor));
     }
 
-    public void startAjaxRetrieveTask (String input)
-    {
-        if (hrt != null)
-        {
+    public void startAjaxRetrieveTask(String input) {
+        if (hrt != null) {
             hrt.cancel(false);
         }
-        if (art != null)
-        {
+        if (art != null) {
             art.cancel(false);
         }
         art = new ajaxRetrieveTask();
@@ -423,71 +374,53 @@ public class MainActivity extends AppCompatActivity
     }
 
     //в соседнем треде получаем словарную статью, кромсаем ее и выводим
-    private class httpRetrieveTask extends AsyncTask <String, Void, String> {
+    private class httpRetrieveTask extends AsyncTask<String, Void, String> {
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
             loadingIndicator.setVisibility(View.VISIBLE);
             outputField.removeAllViews();
         }
 
         @Override
-        protected String doInBackground(String... urls)
-        {
+        protected String doInBackground(String... urls) {
             URL eoUrl = NetworkUtils.buildUrl(urls[0], "http");
             String httpListing = null;
-            try
-            {
+            try {
                 httpListing = NetworkUtils.getResponseFromHttpUrl(eoUrl);
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return httpListing;
         }
 
         @Override
-        protected void onPostExecute(String s)
-        {
+        protected void onPostExecute(String s) {
             loadingIndicator.setVisibility(View.INVISIBLE);
             ScrollView searchOutputWrapper = new ScrollView(MainActivity.this);
             TextView searchOutput = new TextView(MainActivity.this);
-            searchOutput.setPadding(20,20,20,20);
+            searchOutput.setPadding(20, 20, 20, 20);
             searchOutputWrapper.addView(searchOutput);
             outputField.addView(searchOutputWrapper);
-            if (s != null && !s.equals(""))
-            {
+            if (s != null && !s.equals("")) {
                 s = httpParser(s);
-                if (pageExists(s))
-                {
+                if (pageExists(s)) {
                     SpannableString ss = new SpannableString(Html.fromHtml(s));
                     ss = StringParser.addAHrefToEveryWord(ss, MainActivity.this);
-//                    Log.d("sout", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-//                    Log.d("sout", s.toString());
-//                    Log.d("sout", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                     searchOutput.setText(ss);
                     searchOutput.setMovementMethod(LinkMovementMethod.getInstance());
                     isCurWordShouldBeErased(true);
 
-                    if (shouldBeAddedToHistory)
-                    {
+                    if (shouldBeAddedToHistory) {
                         searchBarStack.push(curWord.getText().toString());
                         listInflator(historyLogInDrawer, searchBarStack.getStringArray());
-                    }
-                    else
-                    {
+                    } else {
                         shouldBeAddedToHistory = true;
                     }
-                }
-                else
-                {
+                } else {
                     startAjaxRetrieveTask(curWord.getText().toString());
                 }
-            }
-            else
-            {
+            } else {
                 searchOutput.setText(R.string.network_error);
                 isCurWordShouldBeErased(true);
             }
@@ -495,10 +428,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     //в соседнем треде получаем аякс-ответ, парсим, выводим кликабельные TextView
-    private class ajaxRetrieveTask extends AsyncTask <String, Void, String> {
+    private class ajaxRetrieveTask extends AsyncTask<String, Void, String> {
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
             outputField.removeAllViews();
             loadingIndicator.setVisibility(View.VISIBLE);
@@ -508,41 +440,31 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(String... urls)
-        {
+        protected String doInBackground(String... urls) {
             URL eoUrl = NetworkUtils.buildUrl(urls[0], "ajax");
             String JSONListing = null;
-            try
-            {
+            try {
                 JSONListing = NetworkUtils.getResponseFromHttpUrl(eoUrl);
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return JSONListing;
         }
 
         @Override
-        protected void onPostExecute(String s)
-        {
+        protected void onPostExecute(String s) {
             loadingIndicator.setVisibility(View.INVISIBLE);
-            if (s != null && !s.equals(""))
-            {
+            if (s != null && !s.equals("")) {
                 ArrayList<String> ajaxAnswer = ajaxParser(s);
                 TextView title = new TextView(MainActivity.this);
                 title.setTypeface(null, Typeface.BOLD);
                 title.setTextSize(20);
                 title.setPadding(20, 0, 0, 0);
-                if (ajaxAnswer.size()>0)
-                {
-                    if (curWordStrShifter>0)
-                    {
+                if (ajaxAnswer.size() > 0) {
+                    if (curWordStrShifter > 0) {
                         title.setText("Ошибка ввода!\nВозможные совпадения:");
                         //outputField.addView(title);
-                    }
-                    else
-                    {
+                    } else {
                         title.setText("Возможные совпадения:");
                         //outputField.addView(title);
                     }
@@ -550,19 +472,14 @@ public class MainActivity extends AppCompatActivity
                         curWord.setTextColor(getResources().getColor(R.color.textColor));
                     curWordStrShifter = 0;
 
-                }
-                else
-                {
-                    if (curWord.length()>1 && curWord.length() > curWordStrShifter)
-                    {
+                } else {
+                    if (curWord.length() > 1 && curWord.length() > curWordStrShifter) {
                         curWordStrShifter++;
                         curWord.setTextColor(getResources().getColor(R.color.searchbarTextErrorColor));
                         startAjaxRetrieveTask(curWord.getText().toString()
                                 .substring(0, curWord.length() - curWordStrShifter));
                         //title.setText("Ошибка ввода!");
-                    }
-                    else
-                    {
+                    } else {
                         title.setText("Совпадений не найдено!");
                         //curWord.setTextColor(getResources().getColor(R.color.searchbarTextErrorColor));
                         //outputField.addView(title);
@@ -571,13 +488,11 @@ public class MainActivity extends AppCompatActivity
 
                 ListView ajaxOutput = new ListView(MainActivity.this);
                 ArrayAdapter<String> ajaxAdapter = new ArrayAdapter<String>
-                    (MainActivity.this,R.layout.ajax_list_item, ajaxAnswer);
+                        (MainActivity.this, R.layout.ajax_list_item, ajaxAnswer);
                 ajaxOutput.setAdapter(ajaxAdapter);
                 ajaxOutput.setOnItemClickListener(suggestionClicked);
                 outputField.addView(ajaxOutput);
-            }
-            else
-            {
+            } else {
                 TextView error = new TextView(MainActivity.this);
                 error.setText(R.string.network_error);
                 outputField.addView(error);

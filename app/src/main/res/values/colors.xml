@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#007300</color>
     <color name="colorAccent">#FF4081</color>
     <color name="textColor">#FFF</color>
-    <color name="textColor2">#000</color>
+    <color name="textColor2">#f5f5f5</color>
     <color name="searchbarTextErrorColor">#d50000</color>
     <color name="background">#FFF</color>
 </resources>

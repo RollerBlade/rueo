@@ -1,0 +1,43 @@
+Приложение для работы с эсперанто-русским / русско-эсперантистским онлайн-словарем Бориса Кондратьева (http://rueo.ru). В настоящее время данный словарь существует только в онлайн-виде (это политика авторов).
+
+Основные функции приложения:
+* ввод и поиск русского или эсперантского слова;
+* интеллектуальная работа со строкой ввода (например, автоочистка при наборе нового слова после поиска);
+* вывод подсказок по начальным введенным буквам слова;
+* переход по истории поиска;
+* поиск слова по нажатию его в словарной статье;
+* возможность отправить письмо авторам словаря с предложением или замечанием по текущей словарной статье.
+
+Для работы приложения требуется интернет-соединение.
+
+----------------
+
+An interface application for the online esperanto-russian / russian-esperanto dictionary by Boris Kondratiev (http://rueo.ru). Nowadays, this dictionary has only an online version (this is the policy of the authors). 
+
+The main features of the application:
+* search for entered russian or esperanto word;
+* intellectual work with the input text string (for example, autoclear when entering a new word after a search);
+* showing hints after entering initial letters of a word;
+* providing a history of searches;
+* search of a word on clicking it in the text of a dictionary entry;
+* capability to send a letter to the authors of the dictionary with a comment or suggestion on the current dictionary entry.
+
+The application requires an Internet-connection for its work.
+
+----------------
+
+Приложение для работы с эсперанто-русским / русско-эсперантистским онлайн-словарем Бориса Кондратьева (http://rueo.ru). В настоящее время данный словарь существует только в онлайн-виде (это политика авторов).
+
+Основные функции приложения:
+* ввод и поиск русского или эсперантского слова;
+* интеллектуальная работа со строкой ввода (например, автоочистка при наборе нового слова после поиска);
+* вывод подсказок по начальным введенным буквам слова;
+* переход по истории поиска;
+* поиск слова по нажатию его в словарной статье;
+* возможность отправить письмо авторам словаря с предложением или замечанием по текущей словарной статье.
+
+Для работы приложения требуется интернет-соединение.
+
+
+
+
