@@ -20,8 +20,6 @@ public class InputParser {
         hrefs.unwrap();
         output = div.outerHtml();
 
-        //Log.d("sout", output);
-
         return output;
     }
 
